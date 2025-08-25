@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% load dict_extras_classes %}
+{% block content %}
+<div class="container mt-4">
+  <div class="card shadow-sm p-4">
+    <h2>{{ classroom.name }} - Section {{ classroom.section }}</h2>
+    <p><strong>Capacity:</strong> {{ classroom.capacity }}</p>
+    <p><strong>Today:</strong> {{ today }}</p>
+
+    <hr>
+
+    <h4 class="mb-3">Students & Attendance</h4>
+
+<div class="table-responsive">
+  <table class="table table-hover align-middle">
+    <thead class="table-light">
+      <tr>
+        <th>Name</th>
+        <th>Email</th>
+        <th>Status (Today)</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for student in students %}
+      <tr>
+        <td>{{ student.user.get_full_name }}</td>
+        <td>{{ student.user.email }}</td>
+        <td>
+          {% if student.id in attendance_map %}
+            {% with status=attendance_map|get_item:student.id %}
+              <span class="badge
+                {% if status == 'present' %}bg-success
+                {% elif status == 'absent' %}bg-danger
+                {% else %}bg-warning text-dark
+                {% endif %}">
+                {{ status|capfirst }}
+              </span>
+            {% endwith %}
+          {% else %}
+            <span class="text-muted">Not marked</span>
+          {% endif %}
+        </td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="3" class="text-center text-muted">
+          No students in this class.
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Teacher Details{% endblock %}
+{% block content %}
+<h2 class="mb-3">{{ object.user.get_full_name }}</h2>
+<div class="row">
+  <div class="col-md-6 mb-3">
+    <div class="card shadow-sm text-center p-3">
+      <h4>Subjects</h4>
+      <p class="fs-6">
+        {% for s in object.subject.all %}{% if not forloop.first %}, {% endif %}{{ s.subject }}{% empty %}-{% endfor %}
+      </p>
+    </div>
+  </div>
+  <div class="col-md-6 mb-3">
+    <div class="card shadow-sm text-center p-3">
+      <h4>Assigned Classes</h4>
+      <p class="fs-6">
+        {% for c in object.assigned_class.all %}{% if not forloop.first %}, {% endif %}{{ c.name }}-{{ c.section }}{% empty %}-{% endfor %}
+      </p>
+    </div>
+  </div>
+</div>
+<a class="btn btn-primary" href="{% url 'admin_teacher_edit' object.pk %}">Assign / Edit</a>
+{% endblock %}

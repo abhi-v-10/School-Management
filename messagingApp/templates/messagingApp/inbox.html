@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Inbox</h2>
+<ul class="list-group">
+  {% for msg in messages %}
+  <li class="list-group-item">
+    <strong>{{ msg.sender.username }}</strong>: {{ msg.content }} <br>
+    <small class="text-muted">{{ msg.timestamp }}</small>
+  </li>
+  {% empty %}
+  <li class="list-group-item">No messages yet.</li>
+  {% endfor %}
+</ul>
+<a href="{% url 'send_message' %}" class="btn btn-primary mt-3">Send Message</a>
+{% endblock %}

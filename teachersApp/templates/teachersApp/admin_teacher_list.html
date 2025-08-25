@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}Teachers{% endblock %}
+{% block content %}
+<h2 class="mb-4">Teachers</h2>
+
+<form class="row g-2 mb-3" method="get">
+  <div class="col-sm-8">
+    <input type="text" name="q" value="{{ request.GET.q }}" class="form-control" placeholder="Search name, subject, class">
+  </div>
+  <div class="col-sm-4 d-grid">
+    <button class="btn btn-primary">Search</button>
+  </div>
+</form>
+
+<div class="card p-0">
+  <div class="table-responsive">
+    <table class="table table-striped mb-0 align-middle">
+      <thead class="table-light">
+        <tr><th>Name</th><th>Username</th><th>Subjects</th><th>Classes</th><th></th></tr>
+      </thead>
+      <tbody>
+        {% for t in object_list %}
+        <tr>
+          <td>{{ t.user.get_full_name }}</td>
+          <td>{{ t.user.username }}</td>
+          <td>
+            {% for s in t.subject.all %}{% if not forloop.first %}, {% endif %}{{ s.subject }}{% empty %}-{% endfor %}
+          </td>
+          <td>
+            {% for c in t.assigned_class.all %}{% if not forloop.first %}, {% endif %}{{ c.name }}-{{ c.section }}{% empty %}-{% endfor %}
+          </td>
+          <td class="text-end">
+            <a class="btn btn-sm btn-outline-primary" href="{% url 'admin_teacher_detail' t.pk %}">View</a>
+            <a class="btn btn-sm btn-primary" href="{% url 'admin_teacher_edit' t.pk %}">Assign</a>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="5" class="text-center">No teachers.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% include "partials/pagination.html" %}
+{% endblock %}

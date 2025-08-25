@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-0">Admin Dashboard</h2>
+        <a href="{% url 'notice_list' %}" class="btn btn-primary">
+            📢 View Notices
+        </a>
+    </div>
+
+    <div class="row">
+      <div class="col-md-3 mb-3">
+        <div class="card shadow-sm text-center p-3 position-relative">
+          <h4>Students</h4>
+          <p class="fs-3">{{ student_count }}</p>
+          <a href="{% url 'admin_students_list' %}" class="stretched-link"></a>
+        </div>
+      </div>
+
+      <div class="col-md-3 mb-3">
+        <div class="card shadow-sm text-center p-3 position-relative">
+          <h4>Teachers</h4>
+          <p class="fs-3">{{ teacher_count }}</p>
+          <a href="{% url 'admin_teachers_list' %}" class="stretched-link"></a>
+        </div>
+      </div>
+
+      <div class="col-md-3 mb-3">
+        <div class="card shadow-sm text-center p-3 position-relative">
+          <h4>Classes</h4>
+          <p class="fs-3">{{ class_count }}</p>
+          <a href="{% url 'admin_classes_list' %}" class="stretched-link"></a>
+        </div>
+      </div>
+
+      <div class="col-md-3 mb-3">
+        <div class="card shadow-sm text-center p-3 position-relative">
+          <h4>Exams</h4>
+          <p class="fs-3">{{ exam_count }}</p>
+          <a href="{% url 'admin_exams_list' %}" class="stretched-link"></a>
+        </div>
+      </div>
+    </div>
+
+    <hr>
+
+    <h4>Recent Messages</h4>
+    <ul class="list-group mb-4">
+        {% for msg in recent_messages %}
+        <li class="list-group-item">
+            <strong>{{ msg.sender }}</strong> to <strong>{{ msg.receiver }}</strong>: {{ msg.content|truncatewords:10 }}
+        </li>
+        {% empty %}
+        <li class="list-group-item">No messages</li>
+        {% endfor %}
+    </ul>
+
+    <h4>Upcoming Exams</h4>
+    <ul class="list-group">
+        {% for exam in recent_exams %}
+        <li class="list-group-item">
+            {{ exam.subject }} - {{ exam.class_room }} on {{ exam.exam_date }}
+        </li>
+        {% empty %}
+        <li class="list-group-item">No upcoming exams</li>
+        {% endfor %}
+    </ul>
+</div>
+{% endblock %}

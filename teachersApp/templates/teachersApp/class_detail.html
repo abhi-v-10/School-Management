@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}{{ classroom.name }} - Attendance{% endblock %}
+{% block content %}
+<div class="card shadow-sm p-4">
+    <h3 class="mb-3">{{ classroom.name }} {{ classroom.section }}</h3>
+    <p class="text-muted mb-4">Mark attendance for <strong>{{ today }}</strong></p>
+
+    <form method="POST">
+        {% csrf_token %}
+        <div class="table-responsive">
+            <table class="table align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Student</th>
+                        <th>Status</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for student in students %}
+                    <tr>
+                        <td>{{ student.user.first_name }} {{ student.user.last_name }}</td>
+                        <td style="max-width:180px;">
+                            <select name="status_{{ student.id }}" class="form-select">
+                                <option value="">-- Select --</option>
+                                <option value="present" {% if attendance_map.student.id == "present" %}selected{% endif %}>Present</option>
+                                <option value="absent" {% if attendance_map.student.id == "absent" %}selected{% endif %}>Absent</option>
+                                <option value="late" {% if attendance_map.student.id == "late" %}selected{% endif %}>Late</option>
+                            </select>
+                        </td>
+                        <td class="text-end">
+                            <a href="{% url 'student_attendance_history' student.id %}"
+                               class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-clock-history"></i> History
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div class="mt-4 text-end">
+            <button type="submit" class="btn btn-success">
+                <i class="bi bi-check2-circle"></i> Save Attendance
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

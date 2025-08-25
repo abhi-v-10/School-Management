@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Classes{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h2>Classes</h2>
+  <a class="btn btn-primary" href="{% url 'admin_class_create' %}">+ New Class</a>
+</div>
+
+<div class="card p-0">
+  <table class="table table-striped mb-0 align-middle">
+    <thead class="table-light">
+      <tr>
+        <th>Name</th>
+        <th>Section</th>
+        <th>Capacity</th>
+        <th>Students</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for c in object_list %}
+      <tr>
+        <!-- Make the class name clickable -->
+        <td>
+          <a href="{% url 'class_detail' c.pk %}" class="text-decoration-none">
+            {{ c.name }}
+          </a>
+        </td>
+        <td>{{ c.section }}</td>
+        <td>{{ c.capacity }}</td>
+        <td>{{ c.num_students|default:0 }}</td>
+        <td class="text-end">
+          <a class="btn btn-sm btn-primary" href="{% url 'admin_class_edit' c.pk %}">Edit</a>
+        </td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="5" class="text-center">No classes yet.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

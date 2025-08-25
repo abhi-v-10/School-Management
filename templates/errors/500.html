@@ -1,0 +1,20 @@
+<!-- templates/errors/500.html -->
+{% extends "base.html" %}
+{% block title %}500 Server Error{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-center align-items-center" style="min-height:60vh;">
+  <div class="col-12 col-md-8 col-lg-6">
+    <div class="card shadow-sm border-0 text-center">
+      <div class="card-body p-4 p-md-5">
+        <div class="display-4 fw-bold text-secondary">500</div>
+        <h3 class="mt-2">Internal Server Error</h3>
+        <p class="text-muted mb-4">Something went wrong on our end. Please try again in a moment.</p>
+        <div class="d-flex gap-2 justify-content-center">
+          <a href="{% url 'home' %}" class="btn btn-primary">Home</a>
+          <a href="javascript:location.reload()" class="btn btn-outline-secondary">Reload</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

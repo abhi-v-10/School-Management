@@ -1,0 +1,128 @@
+{% extends 'base.html' %}
+{% block title %}Register{% endblock %}
+
+{% block extra_css %}
+<style>
+  .auth-card {
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    max-width: 520px;
+    margin: 40px auto;
+  }
+  .auth-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+  }
+  .auth-title {
+    font-weight: 600;
+    font-size: 1.25rem;
+  }
+  .form-field + .form-field {
+    margin-top: 12px;
+  }
+  .form-field label {
+    display: block;
+    font-size: 0.95rem;
+    margin-bottom: 6px;
+    color: #333;
+  }
+  .form-field input,
+  .form-field select,
+  .form-field textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    background: #fff;
+  }
+  .form-field small {
+    color: #6c757d;
+    display: none; /* hidden by default */
+  }
+  .form-field.has-error small {
+    display: block; /* show only if field has error */
+    color: #dc3545;
+  }
+  .errorlist {
+    margin: 6px 0 0;
+    padding-left: 18px;
+    color: #dc3545;
+    font-size: 0.9rem;
+  }
+  .non-field-errors {
+    margin-bottom: 12px;
+    color: #dc3545;
+    font-size: 0.95rem;
+  }
+  /* Google button style */
+  .google-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: #fff;
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    padding: 10px;
+    font-weight: 500;
+    font-size: 0.95rem;
+    color: #444;
+    transition: all 0.2s ease;
+    text-decoration: none;
+  }
+  .google-btn:hover {
+    background: #f8f9fa;
+  }
+  .google-btn i {
+    font-size: 1.2rem;
+    color: #db4437;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="auth-card">
+  <div class="card shadow-sm border-0 p-4">
+    <h4 class="auth-title text-center mb-3">Create an account</h4>
+
+    {% if form.non_field_errors %}
+      <div class="non-field-errors">
+        {{ form.non_field_errors }}
+      </div>
+    {% endif %}
+
+    <form method="POST" novalidate>
+      {% csrf_token %}
+
+      {% for field in form %}
+        <div class="form-field {% if field.errors %}has-error{% endif %}">
+          <label for="{{ field.id_for_label }}">
+            {{ field.label }}{% if field.field.required %} *{% endif %}
+          </label>
+          {{ field }}
+
+          {# show help text only if error or requirement not met #}
+          {% if field.errors %}
+            <small>{{ field.help_text }}</small>
+          {% endif %}
+
+          {{ field.errors }}
+        </div>
+      {% endfor %}
+
+      <button type="submit" class="btn btn-primary w-100 mt-3">Register</button>
+    </form>
+
+    <div class="text-center my-3 text-muted">or</div>
+
+    <!-- Proper Google styled button -->
+    <a href="{% url 'social:begin' 'google-oauth2' %}" class="google-btn w-100">
+      <i class="bi bi-google"></i>
+      <span>Sign in with Google</span>
+    </a>
+
+    <p class="text-center text-muted mt-3 mb-0" style="font-size: 0.95rem;">
+      Already have an account? <a href="{% url 'login' %}">Sign in</a>
+    </p>
+  </div>
+</div>
+{% endblock %}

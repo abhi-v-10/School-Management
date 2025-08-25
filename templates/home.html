@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Home - Choose Registration{% endblock %}
+{% block navbar %}
+<nav class="navbar navbar-expand-lg navbar-light bg-white sticky-top">
+    <div class="container">
+        <a class="navbar-brand fw-bold" href="{% url 'home' %}">SchoolMS</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav gap-3 ms-auto">
+                {% if user.is_authenticated %}
+                    <li class="nav-item"><a class="nav-link" href="{% url 'profile' %}">Profile</a></li>
+                    {% if user.role == 'admin' %}
+                        <li class="nav-item"><a class="nav-link" href="{% url 'dashboard_admin' %}">Dashboard</a></li>
+                    {% elif user.role == 'teacher' %}
+                        <li class="nav-item"><a class="nav-link" href="{% url 'dashboard_teacher' %}">Dashboard</a></li>
+                    {% elif user.role == 'student' %}
+                        <li class="nav-item"><a class="nav-link" href="{% url 'dashboard_student' %}">Dashboard</a></li>
+                    {% elif user.role == 'parent' %}
+                        <li class="nav-item"><a class="nav-link" href="{% url 'dashboard_parent' %}">Dashboard</a></li>
+                    {% endif %}
+                    <li class="nav-item"><a class="nav-link" href="{% url 'logout' %}">Logout</a></li>
+                {% else %}
+                    <li class="nav-item"><a class="nav-link" href="{% url 'login' %}">Login</a></li>
+                {% endif %}
+
+                {% comment %} <li class="nav-item"><a class="nav-link" href="{% url 'home' %}">Home</a></li> {% endcomment %}
+
+                {% comment %} <li class="nav-item"><a class="nav-link" href="{% url 'register' %}">Register</a></li> {% endcomment %}
+            </ul>
+        </div>
+    </div>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <h2 class="text-center mb-4">Welcome to School Management System</h2>
+    {% if user.is_authenticated %}
+        <p class="text-center text-muted mb-5">You are logged in as {{ user.role }}.</p>
+        <div class="row g-4 justify-content-center">
+            {% if user.role == 'admin' %}
+                <div class="col-md-3">
+                    <div class="card shadow-sm border-0 text-center h-100">
+                        <div class="card-body">
+                            <h5 class="card-title mb-3">Admin</h5>
+                            <p class="text-muted">Manage all users, courses, and data</p>
+                            <a href="{% url 'dashboard_admin' %}" class="btn btn-primary w-100">Visit Dashboard</a>
+                        </div>
+                    </div>
+                </div>
+            {% elif user.role == 'teacher' %}
+                <div class="col-md-3">
+                    <div class="card shadow-sm border-0 text-center h-100">
+                        <div class="card-body">
+                            <h5 class="card-title mb-3">Teacher</h5>
+                            <p class="text-muted">Handle classes and student progress</p>
+                            <a href="{% url 'dashboard_teacher' %}" class="btn btn-primary w-100">Visit Dashboard</a>
+                        </div>
+                    </div>
+                </div>
+            {% elif user.role == 'student' %}
+                <div class="col-md-3">
+                    <div class="card shadow-sm border-0 text-center h-100">
+                        <div class="card-body">
+                            <h5 class="card-title mb-3">Student</h5>
+                            <p class="text-muted">Access learning materials and track grades</p>
+                            <a href="{% url 'dashboard_student' %}" class="btn btn-primary w-100">Visit Dashboard</a>
+                        </div>
+                    </div>
+                </div>
+            {% elif user.role == 'parent' %}
+                <div class="col-md-3">
+                    <div class="card shadow-sm border-0 text-center h-100">
+                        <div class="card-body">
+                            <h5 class="card-title mb-3">Parent</h5>
+                            <p class="text-muted">Monitor your child’s academic progress</p>
+                            <a href="{% url 'dashboard_parent' %}" class="btn btn-primary w-100">Visit Dashboard</a>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+
+    {% else%}
+    <p class="text-center text-muted mb-5">Please choose your role to login</p>
+    <div class="row g-4 justify-content-center">
+        <!-- Admin -->
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0 text-center h-100">
+                <div class="card-body">
+                    <h5 class="card-title mb-3">Admin</h5>
+                    <p class="text-muted">Manage all users, courses, and data</p>
+                    <a href="{% url 'register_admin' %}" class="btn btn-primary w-100">Register as Admin</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Teacher -->
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0 text-center h-100">
+                <div class="card-body">
+                    <h5 class="card-title mb-3">Teacher</h5>
+                    <p class="text-muted">Handle classes and student progress</p>
+                    <a href="{% url 'register_teacher' %}" class="btn btn-success w-100">Register as Teacher</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Student -->
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0 text-center h-100">
+                <div class="card-body">
+                    <h5 class="card-title mb-3">Student</h5>
+                    <p class="text-muted">Access learning materials and track grades</p>
+                    <a href="{% url 'register_student' %}" class="btn btn-warning w-100">Register as Student</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Parent -->
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0 text-center h-100">
+                <div class="card-body">
+                    <h5 class="card-title mb-3">Parent</h5>
+                    <p class="text-muted">Monitor your child’s academic progress</p>
+                    <a href="{% url 'register_parent' %}" class="btn btn-info w-100">Register as Parent</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

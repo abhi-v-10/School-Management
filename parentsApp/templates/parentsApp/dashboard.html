@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% load dict_extras_classes %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">Welcome, {{ parent.user.first_name }} 👋</h2>
+
+    <div class="row">
+        <!-- Children Section -->
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <h4 class="card-title mb-3">Your Children</h4>
+                    {% if children %}
+                        <ul class="list-group list-group-flush">
+                            {% for child in children %}
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <strong>{{ child.user.first_name }} {{ child.user.last_name }}</strong><br>
+                                        <small class="text-muted">
+                                            Class {{ child.class_room.name }} {{ child.class_room.section }}
+                                        </small>
+                                    </div>
+                                    <div>
+                                        {% with today_att=attendance_map|get_item:child.id %}
+                                            {% if today_att %}
+                                                {% if today_att == "present" %}
+                                                    <span class="badge bg-success">Present</span>
+                                                {% elif today_att == "absent" %}
+                                                    <span class="badge bg-danger">Absent</span>
+                                                {% else %}
+                                                    <span class="badge bg-warning text-dark">Late</span>
+                                                {% endif %}
+                                            {% else %}
+                                                <span class="text-muted">Not marked</span>
+                                            {% endif %}
+                                        {% endwith %}
+                                    </div>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p class="text-muted">No children linked to this account.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Section -->
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <h4 class="card-title mb-3">Results</h4>
+                    {% if results %}
+                        <ul class="list-group list-group-flush">
+                            {% for result in results %}
+                                <li class="list-group-item">
+                                    <strong>{{ result.student.user.first_name }}</strong><br>
+                                    <span>{{ result.exam.subject.name }}:
+                                        <span class="fw-bold">{{ result.score }}%</span>
+                                    </span>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p class="text-muted">No results available yet.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Notices Section -->
+        <div class="col-md-4 mb-3">
+            <div class="card shadow-sm p-3 h-100">
+                <h4>Notices</h4>
+                {% if notices %}
+                    <ul class="list-group list-group-flush mt-2">
+                        {% for notice in notices %}
+                            <li class="list-group-item">
+                                <strong>{{ notice.title }}</strong><br>
+                                <small class="text-muted">{{ notice.message }}</small>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p class="text-muted">No notices available.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

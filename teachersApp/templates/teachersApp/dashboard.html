@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">Welcome, {{ teacher.user.first_name }} 👨‍🏫</h2>
+
+    <div class="row">
+        <!-- Classes Section -->
+        <div class="col-md-4 mb-4">
+    <div class="card shadow-sm h-100">
+        <div class="card-body">
+            <h4 class="card-title mb-3">Your Classes</h4>
+            {% if classes %}
+                <ul class="list-group list-group-flush">
+                    {% for cls in classes %}
+                        <li class="list-group-item">
+                            <a href="{% url 'teacher_class_detail' cls.id %}">
+                                {{ cls.name }} {{ cls.section }}
+                            </a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p class="text-muted">No classes assigned yet.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+        <!-- Subjects Section -->
+        <div class="col-md-4 mb-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <h4 class="card-title mb-3">Subjects You Teach</h4>
+                    {% if subjects %}
+                        <ul class="list-group list-group-flush">
+                            {% for sub in subjects %}
+                                <li class="list-group-item">{{ sub.subject }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p class="text-muted">No subjects assigned yet.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Upcoming Exams Section -->
+        <div class="col-md-4 mb-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <h4 class="card-title mb-3">Upcoming Exams</h4>
+                    {% if exams %}
+                        <ul class="list-group list-group-flush">
+                            {% for exam in exams %}
+                                <li class="list-group-item">
+                                    <strong>{{ exam.subject.name }}</strong><br>
+                                    <small class="text-muted">{{ exam.class_room.name }} - {{ exam.exam_date }}</small>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p class="text-muted">No upcoming exams scheduled.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Results Section -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h4 class="card-title mb-3">Recent Student Results</h4>
+                    {% if results %}
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Student</th>
+                                    <th>Class</th>
+                                    <th>Subject</th>
+                                    <th>Score (%)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for res in results %}
+                                    <tr>
+                                        <td>{{ res.student.user.first_name }} {{ res.student.user.last_name }}</td>
+                                        <td>{{ res.exam.class_room.name }}</td>
+                                        <td>{{ res.exam.subject.subject }}</td>
+                                        <td>{{ res.score }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    {% else %}
+                        <p class="text-muted">No results recorded yet.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Notices Section -->
+    <div class="col-md-4 mb-3">
+        <div class="card shadow-sm p-3">
+            <h4>Notices</h4>
+            {% if notices %}
+                <ul class="list-group list-group-flush mt-2">
+                    {% for notice in notices %}
+                        <li class="list-group-item">
+                            <strong>{{ notice.title }}</strong><br>
+                            <small class="text-muted">{{ notice.message }}</small>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p class="text-muted">No notices available.</p>
+            {% endif %}
+        </div>
+    </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}Create Notice{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card shadow-lg border-0 rounded-3">
+        <div class="card-body p-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h2 class="mb-0">📢 Create Notice</h2>
+                <a href="{% url 'notice_list' %}" class="btn btn-outline-secondary btn-sm">⬅ Back to Notices</a>
+            </div>
+
+            <form method="post" novalidate>
+                {% csrf_token %}
+
+                <div class="mb-3">
+                    <label for="id_title" class="form-label">Title</label>
+                    <input type="text" name="title" class="form-control" id="id_title" placeholder="Enter notice title" required>
+                </div>
+
+                <div class="mb-3">
+                    <label for="id_message" class="form-label">Message</label>
+                    <textarea name="message" class="form-control" id="id_message" rows="5" placeholder="Write the notice details here..." required></textarea>
+                </div>
+
+                <div class="mb-3">
+                    <label for="id_audience" class="form-label">Audience</label>
+                    <select name="audience" class="form-select" id="id_audience">
+                        <option value="all">All</option>
+                        <option value="students">Students</option>
+                        <option value="teachers">Teachers</option>
+                        <option value="parents">Parents</option>
+                    </select>
+                </div>
+
+                <div class="mt-4 d-flex justify-content-end">
+                    <button type="submit" class="btn btn-success px-4">✅ Save Notice</button>
+                    <a href="{% url 'notice_list' %}" class="btn btn-secondary ms-2">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

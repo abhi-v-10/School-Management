@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}Subjects{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h2>Subjects</h2>
+  <a class="btn btn-primary" href="{% url 'admin_subject_create' %}">+ New Subject</a>
+</div>
+
+<div class="card p-0">
+  <table class="table table-striped mb-0 align-middle">
+    <thead class="table-light">
+      <tr><th>Name</th><th>Code</th><th>Teacher</th><th></th></tr>
+    </thead>
+    <tbody>
+      {% for s in object_list %}
+      <tr>
+        <td>{{ s.name }}</td>
+        <td>{{ s.code }}</td>
+        <td>{{ s.teacher.user.get_full_name|default:"—" }}</td>
+        <td class="text-end">
+          <a class="btn btn-sm btn-primary" href="{% url 'admin_subject_edit' s.pk %}">Edit</a>
+        </td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="4" class="text-center">No subjects.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+{% block title %}Student Dashboard{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+    <h2 class="mb-4">Welcome, {{student.user.username}} 👋</h2>
+    <h5 class="text-muted mb-4">Class: {{ student.class_room }}</h5>
+
+    <div class="row">
+        <!-- Attendance Section -->
+        <div class="col-md-6 col-lg-3 mb-3">
+            <div class="card shadow-sm p-3 h-100">
+                <h4>My Attendance</h4>
+                <!-- Today’s Status -->
+                <p class="mt-2">
+                    <strong>Today:</strong>
+                    {% if today_record %}
+                        {% if today_record.status == "present" %}
+                            <span class="badge bg-success">Present</span>
+                        {% elif today_record.status == "absent" %}
+                            <span class="badge bg-danger">Absent</span>
+                        {% else %}
+                            <span class="badge bg-warning text-dark">Late</span>
+                        {% endif %}
+                    {% else %}
+                        <span class="text-muted">Not marked yet</span>
+                    {% endif %}
+                </p>
+
+                <!-- History Table -->
+                <div class="table-responsive mt-3">
+                    <table class="table table-sm table-striped mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Date</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for rec in attendance_history %}
+                                <tr>
+                                    <td>{{ rec.date }}</td>
+                                    <td>
+                                        {% if rec.status == "present" %}
+                                            <span class="badge bg-success">Present</span>
+                                        {% elif rec.status == "absent" %}
+                                            <span class="badge bg-danger">Absent</span>
+                                        {% else %}
+                                            <span class="badge bg-warning text-dark">Late</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="2" class="text-muted text-center">No records</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Upcoming Exams -->
+        <div class="col-md-6 col-lg-3 mb-3">
+            <div class="card shadow-sm text-center p-3 h-100">
+                <h4>Upcoming Exams</h4>
+                {% if exams %}
+                    <ul class="list-group list-group-flush text-start mt-3">
+                        {% for exam in exams %}
+                            <li class="list-group-item">
+                                <strong>{{ exam.subject.subject }}</strong><br>
+                                <small class="text-muted">{{ exam.exam_date }}</small>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p class="text-muted mt-3">No upcoming exams</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Exam Results -->
+        <div class="col-md-6 col-lg-3 mb-3">
+            <div class="card shadow-sm text-center p-3 h-100">
+                <h4>Exam Results</h4>
+                {% if results %}
+                    <table class="table table-striped mt-3 mb-0">
+                        <thead>
+                            <tr>
+                                <th>Subject</th>
+                                <th>Score</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for result in results %}
+                                <tr>
+                                    <td>{{ result.exam.subject.name }}</td>
+                                    <td>{{ result.score }}%</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% else %}
+                    <p class="text-muted mt-3">No results yet</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Notices -->
+        <div class="col-md-6 col-lg-3 mb-3">
+            <div class="card shadow-sm p-3 h-100">
+                <h4>Notices</h4>
+                {% if notices %}
+                    <ul class="list-group list-group-flush mt-2">
+                        {% for notice in notices %}
+                            <li class="list-group-item">
+                                <strong>{{ notice.title }}</strong><br>
+                                <small class="text-muted">{{ notice.message }}</small>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p class="text-muted">No notices available</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
