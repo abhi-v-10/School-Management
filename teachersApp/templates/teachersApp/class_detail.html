@@ -13,6 +13,7 @@
                     <tr>
                         <th>Student</th>
                         <th>Status</th>
+                        <th>Parent Contact</th>
                         <th class="text-end">Actions</th>
                     </tr>
                 </thead>
@@ -27,6 +28,16 @@
                                 <option value="absent" {% if attendance_map.student.id == "absent" %}selected{% endif %}>Absent</option>
                                 <option value="late" {% if attendance_map.student.id == "late" %}selected{% endif %}>Late</option>
                             </select>
+                        </td>
+                        <td>
+                            {% if student.parent %}
+                                <a href="{% url 'conversation' student.parent.user.id %}"
+                                   class="btn btn-sm btn-outline-secondary">
+                                    <i class="bi bi-chat-dots"></i> Message Parent
+                                </a>
+                            {% else %}
+                                <span class="text-muted">No parent linked</span>
+                            {% endif %}
                         </td>
                         <td class="text-end">
                             <a href="{% url 'student_attendance_history' student.id %}"

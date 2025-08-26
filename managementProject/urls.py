@@ -29,6 +29,6 @@ urlpatterns = [
     path('parents/', include('parentsApp.urls')),
     path('classes/', include('classesApp.urls')),
     path('exams/', include('examsApp.urls')),
-    # path('messages/', include('messagingApp.urls')),
+    path('messages/', include('messagingApp.urls')),
     path('attendance/', include('attendanceApp.urls')),
 ]

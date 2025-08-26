@@ -68,10 +68,12 @@
                 </div>
             </div>
         </div>
+    </div>
 
+    <div class="row">
         <!-- Notices Section -->
-        <div class="col-md-4 mb-3">
-            <div class="card shadow-sm p-3 h-100">
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm h-100 p-3">
                 <h4>Notices</h4>
                 {% if notices %}
                     <ul class="list-group list-group-flush mt-2">
@@ -85,6 +87,19 @@
                 {% else %}
                     <p class="text-muted">No notices available.</p>
                 {% endif %}
+            </div>
+        </div>
+
+        <!-- Messaging Section -->
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm h-100 d-flex align-items-center justify-content-center p-4">
+                <div class="text-center">
+                    <h4 class="mb-3">Messaging</h4>
+                    <p class="text-muted">Chat with teachers or the admin directly.</p>
+                    <a href="{% url 'inbox' %}" class="btn btn-primary btn-lg">
+                        💬 Open Messages
+                    </a>
+                </div>
             </div>
         </div>
     </div>

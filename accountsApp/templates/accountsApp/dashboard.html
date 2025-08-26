@@ -5,9 +5,14 @@
 <div class="container my-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2 class="mb-0">Admin Dashboard</h2>
-        <a href="{% url 'notice_list' %}" class="btn btn-primary">
-            📢 View Notices
-        </a>
+        <div>
+            <a href="{% url 'inbox' %}" class="btn btn-outline-primary me-2">
+                💬 Messaging
+            </a>
+            <a href="{% url 'notice_list' %}" class="btn btn-primary">
+                📢 View Notices
+            </a>
+        </div>
     </div>
 
     <div class="row">
@@ -45,17 +50,6 @@
     </div>
 
     <hr>
-
-    <h4>Recent Messages</h4>
-    <ul class="list-group mb-4">
-        {% for msg in recent_messages %}
-        <li class="list-group-item">
-            <strong>{{ msg.sender }}</strong> to <strong>{{ msg.receiver }}</strong>: {{ msg.content|truncatewords:10 }}
-        </li>
-        {% empty %}
-        <li class="list-group-item">No messages</li>
-        {% endfor %}
-    </ul>
 
     <h4>Upcoming Exams</h4>
     <ul class="list-group">

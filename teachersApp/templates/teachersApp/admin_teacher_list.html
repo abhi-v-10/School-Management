@@ -32,6 +32,7 @@
           <td class="text-end">
             <a class="btn btn-sm btn-outline-primary" href="{% url 'admin_teacher_detail' t.pk %}">View</a>
             <a class="btn btn-sm btn-primary" href="{% url 'admin_teacher_edit' t.pk %}">Assign</a>
+            <a class="btn btn-sm btn-success" href="{% url 'conversation' t.user.id %}">Message</a>
           </td>
         </tr>
         {% empty %}

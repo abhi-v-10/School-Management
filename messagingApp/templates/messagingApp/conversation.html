@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Chat{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-8">
+    <div class="card shadow-sm">
+      <div class="card-header bg-white fw-bold d-flex justify-content-between">
+        <span><i class="bi bi-person-circle"></i> Chat with {{ other_user.get_full_name }} ({{ other_user.role }})</span>
+        <a href="{% url 'inbox' %}" class="btn btn-sm btn-outline-secondary">
+          <i class="bi bi-arrow-left"></i> Back
+        </a>
+      </div>
+
+      <div class="card-body" style="max-height: 400px; overflow-y: auto;">
+        {% for msg in chat_messages %}
+          <div class="mb-3 {% if msg.sender == user %}text-end{% endif %}">
+            <div class="d-inline-block p-2 rounded {% if msg.sender == user %}bg-primary text-white{% else %}bg-light{% endif %}">
+              {{ msg.content }}
+            </div>
+            <div class="small text-muted mt-1">
+              {{ msg.timestamp|date:"M d, H:i" }}
+            </div>
+          </div>
+        {% empty %}
+          <p class="text-center text-muted"><i class="bi bi-chat-left-text"></i> No messages yet</p>
+        {% endfor %}
+      </div>
+
+      <div class="card-footer bg-white">
+        <form method="post" class="d-flex">
+          {% csrf_token %}
+          <input type="text" name="content" class="form-control me-2" placeholder="Type your message..." required>
+          <button type="submit" class="btn btn-primary">
+            <i class="bi bi-send-fill"></i>
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
