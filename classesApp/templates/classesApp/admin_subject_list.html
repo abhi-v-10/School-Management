@@ -3,28 +3,42 @@
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-3">
   <h2>Subjects</h2>
-  <a class="btn btn-primary" href="{% url 'admin_subject_create' %}">+ New Subject</a>
+  <a class="role-btn" href="{% url 'admin_subject_create' %}"><span>+ New Subject</span></a>
 </div>
 
 <div class="card p-0">
-  <table class="table table-striped mb-0 align-middle">
-    <thead class="table-light">
-      <tr><th>Name</th><th>Code</th><th>Teacher</th><th></th></tr>
-    </thead>
-    <tbody>
-      {% for s in object_list %}
-      <tr>
-        <td>{{ s.name }}</td>
-        <td>{{ s.code }}</td>
-        <td>{{ s.teacher.user.get_full_name|default:"—" }}</td>
-        <td class="text-end">
-          <a class="btn btn-sm btn-primary" href="{% url 'admin_subject_edit' s.pk %}">Edit</a>
-        </td>
-      </tr>
-      {% empty %}
-      <tr><td colspan="4" class="text-center">No subjects.</td></tr>
-      {% endfor %}
-    </tbody>
-  </table>
+  <div class="table-responsive">
+    <table class="table table-modern table-hover align-middle mb-0 w-100" style="table-layout: fixed;">
+      <thead>
+        <tr>
+          <th style="width:33%; text-align:center;">Name</th>
+          <th style="width:33%; text-align:center;">Teacher</th>
+          <th style="width:34%; text-align:center;">Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for s in object_list %}
+        <tr>
+          <td style="text-align:center; word-break:break-word;">{{ s.subject }}</td>
+          <td style="text-align:center; word-break:break-word;">
+            {% for t in s.assigned_subjects.all %}
+              {{ t.user.get_full_name }}{% if not forloop.last %}, {% endif %}
+            {% empty %}
+              —
+            {% endfor %}
+          </td>
+          <td style="text-align:center;">
+            <a class="role-btn" href="{% url 'admin_subject_edit' s.pk %}"><span><i class="bi bi-pencil"></i> Edit</span></a>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="3" class="text-center">No subjects.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
 </div>
+    <div class="d-flex gap-2 mt-4">
+  <button class="role-btn" onclick="window.history.back();"><span>← Back</span></button>
+    </div>
 {% endblock %}

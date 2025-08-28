@@ -10,7 +10,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.utils.timezone import now
 from studentsApp.models import Student
 from attendanceApp.models import Attendance
-from examsApp.models import Exam, ExamResult
+from examsApp.models import Exam
 from .models import Teacher
 from accountsApp.models import Notice
 
@@ -54,30 +54,24 @@ class AdminTeacherUpdate(AdminRequiredMixin, UpdateView):
 @login_required
 def dashboard_teacher(request):
     teacher = Teacher.objects.get(user=request.user)
-
-    # Classes assigned to this teacher
-    classes = teacher.assigned_class.all()  # Assuming ManyToManyField(ClassRoom) in Teacher model
-
-    # Subjects taught by the teacher
-    subjects = teacher.subject.all()  # Assuming ManyToManyField(Subjects) in Teacher model
-
-    # Upcoming exams for teacher’s classes
+    classes = teacher.assigned_class.all()
+    subjects = teacher.subject.all()
     exams = Exam.objects.filter(class_room__in=classes).order_by('exam_date')
     notices = Notice.objects.order_by('-created_at')[:5]
-
-    # Student performance (all results for teacher's subjects)
-    results = ExamResult.objects.filter(
-        exam__subject__in=subjects,
-        exam__class_room__in=classes
-    ).select_related('student', 'exam')
-
+    total_students = Student.objects.filter(class_room__in=classes).distinct().count()
     context = {
         "teacher": teacher,
         "classes": classes,
         "subjects": subjects,
-        "exams": exams,
-        "results": results,
-        "notices": notices
+        "exams": exams[:6],
+        "exams_full": exams,
+        "notices": notices,
+        "stats": {
+            "classes": classes.count(),
+            "subjects": subjects.count(),
+            "students": total_students,
+            "upcoming_exams": exams.count(),
+        }
     }
     return render(request, "teachersApp/dashboard.html", context)
 

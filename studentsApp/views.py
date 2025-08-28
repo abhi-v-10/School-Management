@@ -4,7 +4,7 @@ from django.contrib.auth import get_user_model
 from accountsApp.models import  User, Notice
 from django.utils.timezone import now
 from attendanceApp.models import Attendance
-from examsApp.models import Exam, ExamResult
+from examsApp.models import Exam  # removed ExamResult import
 from django.db.models import Q
 from django.views.generic import ListView, DetailView, UpdateView
 from django.urls import reverse_lazy
@@ -34,11 +34,9 @@ class AdminStudentList(AdminRequiredMixin, ListView):
             )
         return qs.order_by('user__first_name')
 
-
 class AdminStudentDetail(AdminRequiredMixin, DetailView):
     model = Student
     template_name = 'studentsApp/admin_student_detail.html'
-
 class AdminStudentUpdate(AdminRequiredMixin, UpdateView):
     model = Student
     form_class = StudentAdminForm
@@ -53,18 +51,25 @@ class AdminStudentUpdate(AdminRequiredMixin, UpdateView):
 def dashboard_student(request):
     student = Student.objects.get(user=request.user)
     exams = Exam.objects.filter(class_room=student.class_room)
-    results = ExamResult.objects.filter(student=student)
     notices = Notice.objects.order_by('-created_at')[:5]
     today = now().date()
     today_record = Attendance.objects.filter(student=student, date=today).first()
-    history = Attendance.objects.filter(student=student).order_by('-date')[:10]  # last 10
-
+    history = Attendance.objects.filter(student=student).order_by('-date')[:10]
+    all_att = Attendance.objects.filter(student=student)
+    total_att = all_att.count()
+    present_att = all_att.filter(status='present').count()
+    attendance_pct = round((present_att / total_att) * 100, 1) if total_att else 0
+    stats = {
+        'upcoming_exams': exams.count(),
+        'attendance_pct': attendance_pct,
+        'notices': notices.count(),
+    }
     context = {
         "student": student,
-        "exams": exams,
-        "results": results,
+        "exams": exams[:6],
         "notices": notices,
         "today_record": today_record,
         "history": history,
+        "stats": stats,
     }
     return render(request, "studentsApp/dashboard.html", context )

@@ -43,7 +43,17 @@ class AdminSubjectList(AdminRequiredMixin, ListView):
     model = Subjects
     template_name = 'classesApp/admin_subject_list.html'
     paginate_by = 15
-    ordering = ['name']
+    ordering = ['subject']
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        from teachersApp.models import Teacher
+        subject_teacher_map = {}
+        for subject in context['object_list']:
+            teachers = Teacher.objects.filter(subject=subject)
+            subject_teacher_map[subject.id] = teachers
+        context['subject_teacher_map'] = subject_teacher_map
+        return context
 
 class AdminSubjectCreate(AdminRequiredMixin, CreateView):
     model = Subjects

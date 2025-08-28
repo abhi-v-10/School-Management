@@ -1,42 +1,112 @@
 {% extends "base.html" %}
 {% block title %}Chat{% endblock %}
 
+{% block extra_css %}
+<style>
+  .chat-shell { max-width:900px; margin:0 auto; }
+  .chat-card { border:1px solid #e5e7eb; border-radius:18px; overflow:hidden; display:flex; flex-direction:column; height:560px; }
+  .chat-header { background:linear-gradient(45deg,var(--accent),#4facfe); color:#fff; padding:14px 20px; display:flex; align-items:center; justify-content:space-between; }
+  .chat-header-left { display:flex; align-items:center; gap:12px; }
+  .chat-avatar { width:48px; height:48px; border-radius:50%; object-fit:cover; background:#eef3ff; display:flex; align-items:center; justify-content:center; font-weight:600; font-size:18px; border:3px solid rgba(255,255,255,.4); }
+  .chat-user-meta { line-height:1.1; }
+  .chat-user-name { font-weight:600; font-size:.95rem; }
+  .chat-user-role { font-size:.65rem; letter-spacing:.5px; text-transform:uppercase; opacity:.85; }
+  .chat-body { flex:1; padding:20px 24px 10px; overflow-y:auto; background:#fafbfc; }
+  .msg-row { margin-bottom:16px; display:flex; gap:10px; }
+  .msg-row.self { flex-direction:row-reverse; }
+  .msg-avatar { width:40px; height:40px; border-radius:50%; object-fit:cover; background:#eef2ff; display:flex; align-items:center; justify-content:center; font-weight:600; font-size:15px; border:2px solid #e5e9f2; }
+  .bubble { max-width:62%; padding:10px 14px; border-radius:16px; position:relative; font-size:.85rem; line-height:1.35; box-shadow:0 4px 10px rgba(0,0,0,.05); }
+  .bubble .time { display:block; margin-top:6px; font-size:.6rem; opacity:.7; font-weight:500; }
+  .self .bubble { background:var(--accent); color:#fff; border-bottom-right-radius:4px; }
+  .other .bubble { background:#ffffff; color:#222; border-bottom-left-radius:4px; }
+  /* Role-specific accent border for other user bubble */
+  .other.role-admin .bubble { border:1px solid #006bb3; }
+  .other.role-teacher .bubble { border:1px solid #28a745; }
+  .other.role-student .bubble { border:1px solid #ffc107; }
+  .other.role-parent .bubble { border:1px solid #17a2b8; }
+  .chat-footer { padding:14px 18px 16px; background:#fff; border-top:1px solid #e5e7eb; }
+  .chat-input-wrap { display:flex; gap:10px; align-items:flex-end; }
+  .chat-text { flex:1; resize:none; border:1px solid #d8dde3; border-radius:14px; padding:10px 14px; min-height:48px; max-height:140px; font-size:.85rem; }
+  .chat-text:focus { outline:none; border-color:var(--accent); box-shadow:0 0 0 3px rgba(24,117,255,.15); }
+  .send-btn { border:none; background:var(--accent); color:#fff; padding:12px 18px; border-radius:14px; display:flex; align-items:center; gap:6px; font-weight:600; font-size:.8rem; }
+  .send-btn:hover { background:color-mix(in srgb,var(--accent) 85%, #000); }
+  .empty-chat { text-align:center; margin-top:120px; color:#97a0b3; }
+  .empty-chat i { font-size:50px; display:block; margin-bottom:12px; }
+  @media (max-width:700px){ .chat-card { height:calc(100vh - 160px); } .bubble { max-width:78%; } }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="row justify-content-center">
-  <div class="col-md-8">
-    <div class="card shadow-sm">
-      <div class="card-header bg-white fw-bold d-flex justify-content-between">
-        <span><i class="bi bi-person-circle"></i> Chat with {{ other_user.get_full_name }} ({{ other_user.role }})</span>
-        <a href="{% url 'inbox' %}" class="btn btn-sm btn-outline-secondary">
-          <i class="bi bi-arrow-left"></i> Back
-        </a>
+<div class="chat-shell mt-3">
+  <div class="chat-card shadow-sm">
+    <div class="chat-header">
+      <div class="chat-header-left">
+        {% if other_user.profile_photo %}
+          <img src="{{ other_user.profile_photo.url }}" class="chat-avatar" alt="avatar">
+        {% else %}
+          <div class="chat-avatar">{{ other_user.get_full_name|default:other_user.username|slice:':1'|upper }}</div>
+        {% endif %}
+        <div class="chat-user-meta">
+          <div class="chat-user-name">{{ other_user.get_full_name|default:other_user.username }}</div>
+          <div class="chat-user-role">{{ other_user.role }}</div>
+        </div>
       </div>
-
-      <div class="card-body" style="max-height: 400px; overflow-y: auto;">
+      <a href="{% url 'inbox' %}" class="role-btn"><span><i class="bi bi-arrow-left"></i> Back</span></a>
+    </div>
+    <div class="chat-body" id="chatBody">
+      {% if chat_messages %}
         {% for msg in chat_messages %}
-          <div class="mb-3 {% if msg.sender == user %}text-end{% endif %}">
-            <div class="d-inline-block p-2 rounded {% if msg.sender == user %}bg-primary text-white{% else %}bg-light{% endif %}">
-              {{ msg.content }}
+          {% if msg.sender == user %}
+            <div class="msg-row self" data-mid="{{ msg.id }}">
+              {% if user.profile_photo %}
+                <img src="{{ user.profile_photo.url }}" class="msg-avatar" alt="me">
+              {% else %}
+                <div class="msg-avatar">{{ user.get_full_name|default:user.username|slice:':1'|upper }}</div>
+              {% endif %}
+              <div class="bubble">{{ msg.content|linebreaksbr }}<span class="time">{{ msg.timestamp|date:"M d, H:i" }}</span></div>
             </div>
-            <div class="small text-muted mt-1">
-              {{ msg.timestamp|date:"M d, H:i" }}
+          {% else %}
+            <div class="msg-row other role-{{ msg.sender.role|lower }}" data-mid="{{ msg.id }}">
+              {% if msg.sender.profile_photo %}
+                <img src="{{ msg.sender.profile_photo.url }}" class="msg-avatar" alt="avatar">
+              {% else %}
+                <div class="msg-avatar">{{ msg.sender.get_full_name|default:msg.sender.username|slice:':1'|upper }}</div>
+              {% endif %}
+              <div class="bubble">{{ msg.content|linebreaksbr }}<span class="time">{{ msg.timestamp|date:"M d, H:i" }}</span></div>
             </div>
-          </div>
-        {% empty %}
-          <p class="text-center text-muted"><i class="bi bi-chat-left-text"></i> No messages yet</p>
+          {% endif %}
         {% endfor %}
-      </div>
-
-      <div class="card-footer bg-white">
-        <form method="post" class="d-flex">
-          {% csrf_token %}
-          <input type="text" name="content" class="form-control me-2" placeholder="Type your message..." required>
-          <button type="submit" class="btn btn-primary">
-            <i class="bi bi-send-fill"></i>
-          </button>
-        </form>
-      </div>
+      {% else %}
+        <div class="empty-chat"><i class="bi bi-chat-left-text"></i>No messages yet</div>
+      {% endif %}
+    </div>
+    <div class="chat-footer">
+      <form method="post" id="chatForm" autocomplete="off">
+        {% csrf_token %}
+        <div class="chat-input-wrap">
+          <textarea name="content" id="chatInput" class="chat-text" placeholder="Type a message..." required></textarea>
+          <button type="submit" class="send-btn" id="sendBtn"><i class="bi bi-send-fill"></i><span>Send</span></button>
+        </div>
+        <div class="mt-1 small text-muted">Press Enter to send • Shift+Enter for newline</div>
+      </form>
     </div>
   </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  const chatBody = document.getElementById('chatBody');
+  function scrollToBottom(){ chatBody.scrollTop = chatBody.scrollHeight; }
+  scrollToBottom();
+
+  const input = document.getElementById('chatInput');
+  const form = document.getElementById('chatForm');
+  input.addEventListener('keydown', e => {
+    if(e.key === 'Enter' && !e.shiftKey){
+      e.preventDefault();
+      if(input.value.trim().length){ form.submit(); }
+    }
+  });
+</script>
 {% endblock %}

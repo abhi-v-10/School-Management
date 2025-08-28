@@ -8,14 +8,14 @@
     <input type="text" name="q" value="{{ request.GET.q }}" class="form-control" placeholder="Search name, username, class, parent contact">
   </div>
   <div class="col-sm-4 d-grid">
-    <button class="btn btn-primary">Search</button>
+    <button class="role-btn"><span><i class="bi bi-search"></i> Search</span></button>
   </div>
 </form>
 
 <div class="card p-0">
   <div class="table-responsive">
-    <table class="table table-striped mb-0 align-middle">
-      <thead class="table-light">
+    <table class="table table-modern table-hover align-middle mb-0">
+      <thead>
         <tr>
           <th>Name</th><th>Username</th><th>Class</th><th>Admission</th><th>Parent</th><th></th>
         </tr>
@@ -23,15 +23,15 @@
       <tbody>
         {% for s in object_list %}
         <tr>
-          <td>{{ s.user.get_full_name }}</td>
+          <td>{% include 'partials/user_avatar_name.html' with user_obj=s.user size=32 %}</td>
           <td>{{ s.user.username }}</td>
           <td>{{ s.class_room.name }}-{{ s.class_room.section }}</td>
           <td>{{ s.admission_date }}</td>
           <td>{{ s.parent.phone_number }}</td>
           <td class="text-end">
-            <a class="btn btn-sm btn-outline-primary" href="{% url 'admin_student_detail' s.pk %}">View</a>
-            <a class="btn btn-sm btn-primary" href="{% url 'admin_student_edit' s.pk %}">Edit</a>
-            <a class="btn btn-sm btn-success" href="{% url 'conversation' s.parent.user.id %}">Message</a>
+            <a class="role-btn" href="{% url 'admin_student_detail' s.pk %}"><span><i class="bi bi-eye"></i> View</span></a>
+            <a class="role-btn" href="{% url 'admin_student_edit' s.pk %}"><span><i class="bi bi-pencil"></i> Edit</span></a>
+            <a class="role-btn" href="{% url 'conversation' s.parent.user.id %}"><span><i class="bi bi-chat-right-dots"></i> Message</span></a>
           </td>
         </tr>
         {% empty %}
@@ -41,6 +41,9 @@
     </table>
   </div>
 </div>
+    <div class="d-flex gap-2 mt-4">
+  <button class="role-btn" onclick="window.history.back();"><span>← Back</span></button>
+    </div>
 
 <nav class="mt-3">
   {% if is_paginated %}

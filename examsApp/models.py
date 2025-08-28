@@ -1,5 +1,4 @@
 from django.db import models
-from studentsApp.models import Student
 from classesApp.models import ClassRoom, Subjects
 
 class Exam(models.Model):
@@ -10,11 +9,3 @@ class Exam(models.Model):
 
     def __str__(self):
         return f"{self.subject.subject} - {self.class_room.name} ({self.exam_date})"
-
-class ExamResult(models.Model):
-    exam = models.ForeignKey(Exam, on_delete=models.CASCADE)
-    student = models.ForeignKey(Student, on_delete=models.CASCADE)
-    marks_obtained = models.PositiveIntegerField()
-
-    def __str__(self):
-        return f"{self.student} - {self.exam} - {self.marks_obtained}"

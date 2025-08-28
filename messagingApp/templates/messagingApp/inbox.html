@@ -1,29 +1,79 @@
 {% extends "base.html" %}
 {% block title %}Inbox{% endblock %}
 
+{% block extra_css %}
+<style>
+  .inbox-shell { max-width: 900px; margin:0 auto; }
+  .inbox-card { border-radius:18px; overflow:hidden; border:1px solid #e5e7eb; }
+  .inbox-header { background: linear-gradient(45deg, var(--accent), #4facfe); color:#fff; font-weight:600; padding:18px 24px; display:flex; align-items:center; justify-content:space-between; }
+  .inbox-header h1 { font-size:1.15rem; margin:0; font-weight:600; }
+  .conv-item { position:relative; display:flex; gap:14px; padding:16px 22px; border-bottom:1px solid #f1f3f5; text-decoration:none; color:inherit; transition:background .18s ease, transform .18s ease; }
+  .conv-item:last-child { border-bottom:none; }
+  .conv-item:hover { background:#f8faff; transform:translateX(4px); }
+  .conv-avatar { width:52px; height:52px; border-radius:50%; object-fit:cover; border:3px solid #f0f2f5; background:#eef3ff; display:flex; align-items:center; justify-content:center; font-weight:600; font-size:18px; color:var(--accent); }
+  .conv-body { flex:1; min-width:0; display:flex; flex-direction:column; }
+  .conv-top { display:flex; align-items:center; gap:8px; }
+  .conv-name { font-weight:600; font-size:.95rem; }
+  .role-chip { font-size:10px; text-transform:uppercase; letter-spacing:.5px; padding:2px 6px; border-radius:20px; background:#eef1f6; font-weight:600; }
+  .conv-preview { font-size:.8rem; color:#66708a; margin-top:4px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%; }
+  .conv-meta { display:flex; flex-direction:column; align-items:flex-end; gap:6px; min-width:72px; }
+  .conv-time { font-size:.65rem; color:#8891a4; font-weight:500; }
+  .unread-dot { width:12px; height:12px; border-radius:50%; box-shadow:0 0 0 4px rgba(0,0,0,.05); }
+  .conv-item.unread .conv-name { color:#111; }
+  .conv-item.unread .conv-preview { font-weight:500; color:#334155; }
+  .inbox-empty { text-align:center; padding:70px 20px; color:#8b95a7; }
+  .inbox-empty i { font-size:48px; margin-bottom:12px; display:block; }
+  /* Role colors for unread dot */
+  .role-admin { background:#006bb3; }
+  .role-teacher { background:#28a745; }
+  .role-student { background:#ffc107; }
+  .role-parent { background:#17a2b8; }
+  @media (max-width:600px){ .conv-item { padding:14px 16px; } .conv-avatar { width:46px; height:46px; font-size:16px; } }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="row justify-content-center">
-  <div class="col-md-8">
-    <div class="card shadow-sm">
-      <div class="card-header bg-white fw-bold">
-        <i class="bi bi-chat-dots"></i> Inbox
-      </div>
-      <div class="list-group list-group-flush">
-        {% for user in conversations %}
-          <a href="{% url 'conversation' user.id %}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
-            <div>
-              <i class="bi bi-person-circle"></i>
-              {{ user.get_full_name }} <span class="text-muted">({{ user.role }})</span>
+<div class="inbox-shell mt-3">
+  <div class="inbox-card shadow-sm">
+    <div class="inbox-header">
+      <h1><i class="bi bi-chat-dots-fill me-2"></i>Inbox</h1>
+      <a href="{% url dashboard_url_name %}" class="role-btn"><span><i class="bi bi-arrow-left"></i> Back</span></a>
+    </div>
+    {% if conversations %}
+      <div class="conv-list">
+        {% for u in conversations %}
+          {# Determine unread: unread_count annotation #}
+          <a href="{% url 'conversation' u.id %}" class="conv-item {% if u.unread_count %}unread{% endif %}">
+            {# Avatar #}
+            {% if u.profile_photo %}
+              <img src="{{ u.profile_photo.url }}" alt="avatar" class="conv-avatar">
+            {% else %}
+              <div class="conv-avatar">{{ u.get_full_name|default:u.username|slice:':1'|upper }}</div>
+            {% endif %}
+            <div class="conv-body">
+              <div class="conv-top">
+                <div class="conv-name">{{ u.get_full_name|default:u.username }}</div>
+                <div class="role-chip">{{ u.role }}</div>
+              </div>
+              <div class="conv-preview">
+                {% if u.latest_content %}{{ u.latest_content|truncatechars:70 }}{% else %}<em>No messages yet</em>{% endif %}
+              </div>
             </div>
-            <i class="bi bi-chevron-right"></i>
+            <div class="conv-meta">
+              <div class="conv-time">{% if u.latest_timestamp %}{{ u.latest_timestamp|date:"M d" }}<br>{{ u.latest_timestamp|date:"H:i" }}{% endif %}</div>
+              {% if u.unread_count %}
+                <div class="unread-dot role-{{ u.role|lower }}" title="{{ u.unread_count }} unread"></div>
+              {% endif %}
+            </div>
           </a>
-        {% empty %}
-          <div class="list-group-item text-center text-muted">
-            <i class="bi bi-inbox"></i> No conversations yet
-          </div>
         {% endfor %}
       </div>
-    </div>
+    {% else %}
+      <div class="inbox-empty">
+        <i class="bi bi-inbox"></i>
+        <p>No conversations yet</p>
+      </div>
+    {% endif %}
   </div>
 </div>
 {% endblock %}

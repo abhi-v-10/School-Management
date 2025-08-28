@@ -10,8 +10,10 @@ from studentsApp.models import Student
 from teachersApp.models import Teacher
 from classesApp.models import ClassRoom
 from attendanceApp.models import Attendance
-from examsApp.models import Exam, ExamResult
+from examsApp.models import Exam  # removed ExamResult
 from messagingApp.models import Message
+from parentsApp.models import Parent  # added for parent count
+from accountsApp.models import Notice  # added for notifications
 
 def home(request):
     return render(request, 'home.html')
@@ -94,11 +96,16 @@ def dashboard_admin(request):
     context = {
         "student_count": Student.objects.count(),
         "teacher_count": Teacher.objects.count(),
+        "parent_count": Parent.objects.count(),
         "class_count": ClassRoom.objects.count(),
         "exam_count": Exam.objects.count(),
+        "notification_count": Notice.objects.count(),
         "recent_attendance": Attendance.objects.order_by('-date')[:5],
         "recent_messages": Message.objects.order_by('-timestamp')[:5],
         "recent_exams": Exam.objects.order_by('-exam_date')[:5],
+        "recent_students": Student.objects.order_by('-admission_date')[:5],
+        "recent_notifications": Notice.objects.order_by('-created_at')[:5],
+        "active_users": get_user_model().objects.filter(is_active=True).count(),
     }
     return render(request, "accountsApp/dashboard.html", context)
 
@@ -107,7 +114,14 @@ User = get_user_model()
 @login_required
 def profile_view(request):
     if request.method == 'POST':
-        form = ProfileForm(request.POST, instance=request.user)
+        if 'remove_photo' in request.POST:
+            if request.user.profile_photo:
+                request.user.profile_photo.delete(save=False)
+            request.user.profile_photo = None
+            request.user.save()
+            messages.success(request, "Profile photo removed.")
+            return redirect('profile')
+        form = ProfileForm(request.POST, request.FILES, instance=request.user)
         if form.is_valid():
             form.save()
             messages.success(request, "Profile updated successfully.")
@@ -143,4 +157,3 @@ def notice_create(request):
         form = NoticeForm()
 
     return render(request, "accountsApp/notice_form.html", {"form": form})
-

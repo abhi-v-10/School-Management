@@ -61,10 +61,12 @@ class ProfileForm(forms.ModelForm):
         max_length=15, required=False, label="Mobile Number",
         widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter mobile'})
     )
+    profile_photo = forms.ImageField(required=False, label="Profile Photo",
+                                     widget=forms.ClearableFileInput(attrs={'class': 'form-control'}))
 
     class Meta:
         model = User
-        fields = ['username', 'first_name', 'last_name', 'email']  # your custom User has `role` but no mobile
+        fields = ['username', 'first_name', 'last_name', 'email', 'profile_photo']  # your custom User has `role` but no mobile
         widgets = {
             'username': forms.TextInput(attrs={'class': 'form-control'}),
             'first_name': forms.TextInput(attrs={'class': 'form-control'}),
@@ -86,6 +88,12 @@ class ProfileForm(forms.ModelForm):
         else:
             # not a parent → remove the field from the form entirely
             self.fields.pop('phone_number', None)
+
+    def clean_profile_photo(self):
+        photo = self.cleaned_data.get('profile_photo')
+        if photo and photo.size > 5 * 1024 * 1024:  # 5MB
+            raise forms.ValidationError("Image must be 5MB or smaller.")
+        return photo
 
     def save(self, commit=True):
         user = super().save(commit=commit)

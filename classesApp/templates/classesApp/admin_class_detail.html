@@ -12,8 +12,8 @@
     <h4 class="mb-3">Students & Attendance</h4>
 
 <div class="table-responsive">
-  <table class="table table-hover align-middle">
-    <thead class="table-light">
+  <table class="table table-modern table-hover align-middle mb-0">
+    <thead>
       <tr>
         <th>Name</th>
         <th>Email</th>
@@ -23,16 +23,12 @@
     <tbody>
       {% for student in students %}
       <tr>
-        <td>{{ student.user.get_full_name }}</td>
+        <td>{% include 'partials/user_avatar_name.html' with user_obj=student.user size=32 %}</td>
         <td>{{ student.user.email }}</td>
         <td>
           {% if student.id in attendance_map %}
             {% with status=attendance_map|get_item:student.id %}
-              <span class="badge
-                {% if status == 'present' %}bg-success
-                {% elif status == 'absent' %}bg-danger
-                {% else %}bg-warning text-dark
-                {% endif %}">
+              <span class="badge {% if status == 'present' %}bg-success{% elif status == 'absent' %}bg-danger{% else %}bg-warning text-dark{% endif %}">
                 {{ status|capfirst }}
               </span>
             {% endwith %}
@@ -43,9 +39,7 @@
       </tr>
       {% empty %}
       <tr>
-        <td colspan="3" class="text-center text-muted">
-          No students in this class.
-        </td>
+        <td colspan="3" class="text-center text-muted">No students in this class.</td>
       </tr>
       {% endfor %}
     </tbody>
@@ -53,5 +47,9 @@
 </div>
 
   </div>
+<div class="d-flex gap-2 mt-4">
+  <button class="role-btn" onclick="window.history.back();"><span>← Back</span></button>
+    </div>
 </div>
+
 {% endblock %}

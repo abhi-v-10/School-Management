@@ -1,0 +1,20 @@
+{% comment %}
+Reusable user avatar + name snippet.
+Usage: {% include 'partials/user_avatar_name.html' with user_obj=student.user size=36 %}
+Optional: show_name=False to hide the text name.
+{% endcomment %}
+{% with s=size|default:40 %}
+<div class="d-flex align-items-center">
+  {% if user_obj.profile_photo %}
+    <img src="{{ user_obj.profile_photo.url }}" alt="avatar" class="rounded-circle" style="width:{{ s }}px;height:{{ s }}px;object-fit:cover;border:2px solid var(--accent,#1875FF);">
+  {% else %}
+    <div class="rounded-circle d-flex justify-content-center align-items-center fw-semibold text-uppercase" style="width:{{ s }}px;height:{{ s }}px;background:#eef2ff;color:var(--accent,#1875FF);border:2px solid var(--accent,#1875FF);font-size:14px;">
+      {{ user_obj.get_full_name|default:user_obj.username|slice:':1'|upper }}
+    </div>
+  {% endif %}
+  {% if show_name|default:True %}
+    <span class="ms-2">{{ user_obj.get_full_name|default:user_obj.username }}</span>
+  {% endif %}
+</div>
+{% endwith %}
+

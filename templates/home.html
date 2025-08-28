@@ -1,5 +1,165 @@
 {% extends "base.html" %}
 {% load static %}
+{%  block extra_css  %}
+<style>
+
+    .button {
+      position: relative;
+      max-width: 250px; /* makes it less wide */
+      margin: 0 auto;
+      transition: all 0.3s ease-in-out;
+      box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.2);
+      padding-block: 0.5rem;
+      padding-inline: 1.25rem;
+      border-radius: 9999px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+        font-weight: 600;
+      border: 3px solid #ffffff4d;
+      outline: none;
+      overflow: hidden;
+      font-size: 15px;
+      cursor: pointer;
+      text-decoration: none; /* removes underline for <a> */
+      color: black;
+    }
+
+    /* Role-specific button accents */
+    .btn-admin {
+      background-color: #006bb3; /* deep blue */
+    }
+
+    .btn-teacher {
+      background-color: #28a745; /* green */
+    }
+
+    .btn-student {
+      background-color: #ffc107; /* amber */
+    }
+
+    .btn-parent {
+      background-color: #17a2b8; /* teal/cyan */
+    }
+
+    /* Hover animation */
+    .button:hover {
+      transform: scale(1.05);
+      border-color: #fff9;
+    }
+
+    .button:hover .icon {
+      transform: translate(4px);
+    }
+
+    .button:hover::before {
+      animation: shine 1.5s ease-out infinite;
+    }
+
+    .button::before {
+      content: "";
+      position: absolute;
+      width: 100px;
+      height: 100%;
+      background-image: linear-gradient(
+        120deg,
+        rgba(255, 255, 255, 0) 30%,
+        rgba(255, 255, 255, 0.8),
+        rgba(255, 255, 255, 0) 70%
+      );
+      top: 0;
+      left: -100px;
+      opacity: 0.6;
+    }
+
+    @keyframes shine {
+      0% {
+        left: -100px;
+      }
+      60% {
+        left: 100%;
+      }
+      to {
+        left: 100%;
+      }
+    }
+    .icon {
+  width: 20px;
+  height: 20px;
+  transition: all 0.3s ease-in-out;
+}
+/* Base button (shared for all roles) */
+.btn-glow {
+  display: inline-block;
+  border-radius: 7px;
+  color: black;
+    font-weight: 600;
+  font-family: inherit;
+  font-size: 14px;
+  padding: 0.9em 1.8em;
+  text-decoration: none;
+  cursor: pointer;
+  height: 40px;
+  position: relative;
+  overflow: hidden;
+  width: 10em;
+  text-align: center;
+  transition: 0.3s;
+}
+
+/* Text animation (same for all) */
+.btn-glow span {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  transition: all 0.4s ease;
+  white-space: nowrap;
+}
+.btn-glow .default-text {
+  opacity: 1;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+.btn-glow .hover-text {
+  opacity: 0;
+  top: 150%;
+  transform: translate(-50%, -50%);
+}
+.btn-glow:hover .default-text {
+  opacity: 0;
+  top: -50%;
+}
+.btn-glow:hover .hover-text {
+  opacity: 1;
+  top: 50%;
+}
+
+/* 🔹 Role-based colors */
+.button-admin {
+  background: #006bb3;
+  box-shadow: 0px 14px 56px -11px #006bb3;
+}
+
+.button-teacher {
+  background: #28a745;
+  box-shadow: 0px 14px 56px -11px #28a745;
+}
+
+.button-parent {
+  background: #17a2b8;
+  box-shadow: 0px 14px 56px -11px #17a2b8;
+}
+
+.button-student {
+  background: #ffc107;
+  box-shadow: 0px 14px 56px -11px #ffc107;
+}
+
+
+
+</style>
+{% endblock %}
 
 {% block title %}Home - Choose Registration{% endblock %}
 {% block navbar %}
@@ -48,7 +208,13 @@
                         <div class="card-body">
                             <h5 class="card-title mb-3">Admin</h5>
                             <p class="text-muted">Manage all users, courses, and data</p>
-                            <a href="{% url 'dashboard_admin' %}" class="btn btn-primary w-100">Visit Dashboard</a>
+                            <a href="{% url 'dashboard_admin' %}" class="btn-glow button-admin">
+  <span class="default-text">Visit</span>
+  <span class="hover-text">Dashboard</span>
+</a>
+
+
+
                         </div>
                     </div>
                 </div>
@@ -58,7 +224,10 @@
                         <div class="card-body">
                             <h5 class="card-title mb-3">Teacher</h5>
                             <p class="text-muted">Handle classes and student progress</p>
-                            <a href="{% url 'dashboard_teacher' %}" class="btn btn-primary w-100">Visit Dashboard</a>
+                            <a href="{% url 'dashboard_teacher' %}" class="btn-glow button-teacher">
+  <span class="default-text">Visit</span>
+  <span class="hover-text">Dashboard</span>
+</a>
                         </div>
                     </div>
                 </div>
@@ -68,7 +237,10 @@
                         <div class="card-body">
                             <h5 class="card-title mb-3">Student</h5>
                             <p class="text-muted">Access learning materials and track grades</p>
-                            <a href="{% url 'dashboard_student' %}" class="btn btn-primary w-100">Visit Dashboard</a>
+                            <a href="{% url 'dashboard_student' %}" class="btn-glow button-student">
+  <span class="default-text">Visit</span>
+  <span class="hover-text">Dashboard</span>
+</a>
                         </div>
                     </div>
                 </div>
@@ -78,7 +250,10 @@
                         <div class="card-body">
                             <h5 class="card-title mb-3">Parent</h5>
                             <p class="text-muted">Monitor your child’s academic progress</p>
-                            <a href="{% url 'dashboard_parent' %}" class="btn btn-primary w-100">Visit Dashboard</a>
+                            <a href="{% url 'dashboard_parent' %}" class="btn-glow button-parent">
+  <span class="default-text">Visit</span>
+  <span class="hover-text">Dashboard</span>
+</a>
                         </div>
                     </div>
                 </div>
@@ -94,7 +269,19 @@
                 <div class="card-body">
                     <h5 class="card-title mb-3">Admin</h5>
                     <p class="text-muted">Manage all users, courses, and data</p>
-                    <a href="{% url 'register_admin' %}" class="btn btn-primary w-100">Register as Admin</a>
+                    <a href="{% url 'register_admin' %}" class="button btn-admin">
+  Register as Admin
+  <svg class="icon" viewBox="0 0 24 24" fill="currentColor">
+    <path fill-rule="evenodd"
+      d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75
+         9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12
+         2.25zm4.28 10.28a.75.75 0 000-1.06l-3-3a.75.75
+         0 10-1.06 1.06l1.72 1.72H8.25a.75.75 0
+         000 1.5h5.69l-1.72 1.72a.75.75
+         0 101.06 1.06l3-3z"
+      clip-rule="evenodd"></path>
+  </svg>
+</a>
                 </div>
             </div>
         </div>
@@ -105,7 +292,20 @@
                 <div class="card-body">
                     <h5 class="card-title mb-3">Teacher</h5>
                     <p class="text-muted">Handle classes and student progress</p>
-                    <a href="{% url 'register_teacher' %}" class="btn btn-success w-100">Register as Teacher</a>
+                    <a href="{% url 'register_teacher' %}" class="button btn-teacher">
+  Register as Teacher
+  <svg class="icon" viewBox="0 0 24 24" fill="currentColor">
+    <path fill-rule="evenodd"
+      d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365
+         9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385
+         2.25 12 2.25zm4.28 10.28a.75.75 0
+         000-1.06l-3-3a.75.75 0 10-1.06
+         1.06l1.72 1.72H8.25a.75.75 0
+         000 1.5h5.69l-1.72 1.72a.75.75
+         0 101.06 1.06l3-3z"
+      clip-rule="evenodd"></path>
+  </svg>
+</a>
                 </div>
             </div>
         </div>
@@ -116,7 +316,21 @@
                 <div class="card-body">
                     <h5 class="card-title mb-3">Student</h5>
                     <p class="text-muted">Access learning materials and track grades</p>
-                    <a href="{% url 'register_student' %}" class="btn btn-warning w-100">Register as Student</a>
+                    <a href="{% url 'register_student' %}" class="button btn-student">
+  Register as Student
+  <svg class="icon" viewBox="0 0 24 24" fill="currentColor">
+    <path fill-rule="evenodd"
+      d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365
+         9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385
+         2.25 12 2.25zm4.28 10.28a.75.75 0
+         000-1.06l-3-3a.75.75 0 10-1.06
+         1.06l1.72 1.72H8.25a.75.75 0
+         000 1.5h5.69l-1.72 1.72a.75.75
+         0 101.06 1.06l3-3z"
+      clip-rule="evenodd"></path>
+  </svg>
+</a>
+
                 </div>
             </div>
         </div>
@@ -127,7 +341,20 @@
                 <div class="card-body">
                     <h5 class="card-title mb-3">Parent</h5>
                     <p class="text-muted">Monitor your child’s academic progress</p>
-                    <a href="{% url 'register_parent' %}" class="btn btn-info w-100">Register as Parent</a>
+                    <a href="{% url 'register_parent' %}" class="button btn-parent">
+  Register as Parent
+  <svg class="icon" viewBox="0 0 24 24" fill="currentColor">
+    <path fill-rule="evenodd"
+      d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365
+         9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385
+         2.25 12 2.25zm4.28 10.28a.75.75 0
+         000-1.06l-3-3a.75.75 0 10-1.06
+         1.06l1.72 1.72H8.25a.75.75 0
+         000 1.5h5.69l-1.72 1.72a.75.75
+         0 101.06 1.06l3-3z"
+      clip-rule="evenodd"></path>
+  </svg>
+</a>
                 </div>
             </div>
         </div>

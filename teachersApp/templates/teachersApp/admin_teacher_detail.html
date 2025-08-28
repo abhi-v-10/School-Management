@@ -1,7 +1,13 @@
 {% extends "base.html" %}
 {% block title %}Teacher Details{% endblock %}
 {% block content %}
-<h2 class="mb-3">{{ object.user.get_full_name }}</h2>
+<div class="card shadow-sm mb-4 p-4 text-center">
+  <div class="d-flex flex-column align-items-center gap-2">
+    {% include 'partials/user_avatar_name.html' with user_obj=object.user size=90 %}
+    <div class="text-muted small">@{{ object.user.username }}</div>
+  </div>
+</div>
+<h3 class="mb-3">Overview</h3>
 <div class="row">
   <div class="col-md-6 mb-3">
     <div class="card shadow-sm text-center p-3">
@@ -20,5 +26,8 @@
     </div>
   </div>
 </div>
-<a class="btn btn-primary" href="{% url 'admin_teacher_edit' object.pk %}">Assign / Edit</a>
+<div class="d-flex gap-2 mt-4">
+  <a class="role-btn" href="{% url 'admin_teacher_edit' object.pk %}"><span><i class="bi bi-pencil"></i> Edit</span></a>
+  <button class="role-btn" onclick="window.history.back();"><span>← Back</span></button>
+</div>
 {% endblock %}

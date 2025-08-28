@@ -8,20 +8,20 @@
     <input type="text" name="q" value="{{ request.GET.q }}" class="form-control" placeholder="Search name, subject, class">
   </div>
   <div class="col-sm-4 d-grid">
-    <button class="btn btn-primary">Search</button>
+    <button class="role-btn"><span><i class="bi bi-search"></i> Search</span></button>
   </div>
 </form>
 
 <div class="card p-0">
   <div class="table-responsive">
-    <table class="table table-striped mb-0 align-middle">
-      <thead class="table-light">
+    <table class="table table-modern table-hover align-middle mb-0">
+      <thead>
         <tr><th>Name</th><th>Username</th><th>Subjects</th><th>Classes</th><th></th></tr>
       </thead>
       <tbody>
         {% for t in object_list %}
         <tr>
-          <td>{{ t.user.get_full_name }}</td>
+          <td>{% include 'partials/user_avatar_name.html' with user_obj=t.user size=36 %}</td>
           <td>{{ t.user.username }}</td>
           <td>
             {% for s in t.subject.all %}{% if not forloop.first %}, {% endif %}{{ s.subject }}{% empty %}-{% endfor %}
@@ -30,9 +30,9 @@
             {% for c in t.assigned_class.all %}{% if not forloop.first %}, {% endif %}{{ c.name }}-{{ c.section }}{% empty %}-{% endfor %}
           </td>
           <td class="text-end">
-            <a class="btn btn-sm btn-outline-primary" href="{% url 'admin_teacher_detail' t.pk %}">View</a>
-            <a class="btn btn-sm btn-primary" href="{% url 'admin_teacher_edit' t.pk %}">Assign</a>
-            <a class="btn btn-sm btn-success" href="{% url 'conversation' t.user.id %}">Message</a>
+            <a class="role-btn" href="{% url 'admin_teacher_detail' t.pk %}"><span><i class="bi bi-eye"></i> View</span></a>
+            <a class="role-btn" href="{% url 'admin_teacher_edit' t.pk %}"><span><i class="bi bi-pencil"></i> Assign</span></a>
+            <a class="role-btn" href="{% url 'conversation' t.user.id %}"><span><i class="bi bi-chat-right-dots"></i> Message</span></a>
           </td>
         </tr>
         {% empty %}
@@ -42,6 +42,9 @@
     </table>
   </div>
 </div>
+    <div class="d-flex gap-2 mt-4">
+  <button class="role-btn" onclick="window.history.back();"><span>← Back</span></button>
+    </div>
 
 {% include "partials/pagination.html" %}
 {% endblock %}

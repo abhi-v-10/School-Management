@@ -1,107 +1,140 @@
 {% extends "base.html" %}
 {% load dict_extras_classes %}
-
+{% block title %}Parent Dashboard{% endblock %}
+{% block extra_css %}
+<style>
+.parent-sidebar { width:240px; background:#fff; border-right:1px solid #e9ecef; position:fixed; top:0; bottom:0; left:-240px; padding-top:60px; transition:all .3s ease; z-index:1040; }
+.parent-sidebar.active { left:0; }
+.parent-sidebar .nav-link { color:#333; padding:12px 20px; display:flex; align-items:center; font-weight:500; }
+.parent-sidebar .nav-link i { margin-right:10px; }
+.parent-sidebar .nav-link.active, .parent-sidebar .nav-link:hover { background:#f1f5f9; color:var(--accent); }
+#parentSidebarToggle { border:none; background:transparent; font-size:1.6rem; cursor:pointer; }
+.p-stat { border-radius:14px; color:#fff; padding:18px 20px; position:relative; overflow:hidden; display:flex; align-items:center; justify-content:space-between; box-shadow:0 4px 12px rgba(0,0,0,.12); transition:transform .25s ease, box-shadow .25s ease; }
+.p-stat:hover { transform:translateY(-6px); box-shadow:0 10px 26px rgba(0,0,0,.18); }
+.p-stat .icon { font-size:2.3rem; opacity:.9; }
+.p-stat h3 { margin:0; font-size:2rem; font-weight:700; line-height:1; }
+.p-stat h6 { margin:0; font-size:.75rem; font-weight:600; letter-spacing:.7px; text-transform:uppercase; opacity:.9; }
+.bg-grad-a { background:linear-gradient(45deg,#667eea,#764ba2); }
+.bg-grad-b { background:linear-gradient(45deg,#f093fb,#f5576c); }
+.bg-grad-c { background:linear-gradient(45deg,#4facfe,#00f2fe); }
+.bg-grad-d { background:linear-gradient(45deg,#ff9a44,#fc6076); }
+.section-card { border-radius:14px; border:1px solid #e5e7eb; }
+.section-card .card-header { background:#fff; border-bottom:1px solid #eef0f2; font-weight:600; display:flex; justify-content:space-between; align-items:center; }
+.scroll-box { max-height:320px; overflow-y:auto; }
+.table-modern thead { background:linear-gradient(45deg,#1875FF,#4facfe); color:#fff; }
+.child-badge { font-size:.6rem; }
+</style>
+{% endblock %}
 {% block content %}
-<div class="container mt-4">
-    <h2 class="mb-4">Welcome, {{ parent.user.first_name }} 👋</h2>
-
-    <div class="row">
-        <!-- Children Section -->
-        <div class="col-md-6 mb-4">
-            <div class="card shadow-sm h-100">
-                <div class="card-body">
-                    <h4 class="card-title mb-3">Your Children</h4>
-                    {% if children %}
-                        <ul class="list-group list-group-flush">
-                            {% for child in children %}
-                                <li class="list-group-item d-flex justify-content-between align-items-center">
-                                    <div>
-                                        <strong>{{ child.user.first_name }} {{ child.user.last_name }}</strong><br>
-                                        <small class="text-muted">
-                                            Class {{ child.class_room.name }} {{ child.class_room.section }}
-                                        </small>
-                                    </div>
-                                    <div>
-                                        {% with today_att=attendance_map|get_item:child.id %}
-                                            {% if today_att %}
-                                                {% if today_att == "present" %}
-                                                    <span class="badge bg-success">Present</span>
-                                                {% elif today_att == "absent" %}
-                                                    <span class="badge bg-danger">Absent</span>
-                                                {% else %}
-                                                    <span class="badge bg-warning text-dark">Late</span>
-                                                {% endif %}
-                                            {% else %}
-                                                <span class="text-muted">Not marked</span>
-                                            {% endif %}
-                                        {% endwith %}
-                                    </div>
-                                </li>
-                            {% endfor %}
-                        </ul>
-                    {% else %}
-                        <p class="text-muted">No children linked to this account.</p>
-                    {% endif %}
-                </div>
-            </div>
-        </div>
-
-        <!-- Results Section -->
-        <div class="col-md-6 mb-4">
-            <div class="card shadow-sm h-100">
-                <div class="card-body">
-                    <h4 class="card-title mb-3">Results</h4>
-                    {% if results %}
-                        <ul class="list-group list-group-flush">
-                            {% for result in results %}
-                                <li class="list-group-item">
-                                    <strong>{{ result.student.user.first_name }}</strong><br>
-                                    <span>{{ result.exam.subject.name }}:
-                                        <span class="fw-bold">{{ result.score }}%</span>
-                                    </span>
-                                </li>
-                            {% endfor %}
-                        </ul>
-                    {% else %}
-                        <p class="text-muted">No results available yet.</p>
-                    {% endif %}
-                </div>
-            </div>
-        </div>
+<div class="d-flex">
+  <nav id="parentSidebar" class="parent-sidebar">
+    <div class="nav flex-column">
+      <div class="px-3 pt-2 pb-1 text-uppercase small text-muted">Menu</div>
+      <a class="nav-link active" href="{% url 'dashboard_parent' %}"><i class="bi bi-speedometer2"></i> Dashboard</a>
+      <a class="nav-link" href="#children"><i class="bi bi-people"></i> Children</a>
+      <a class="nav-link" href="#attendance"><i class="bi bi-clipboard-check"></i> Attendance</a>
+      <a class="nav-link" href="#notices"><i class="bi bi-bell"></i> Notices</a>
+      <a class="nav-link" href="#messages"><i class="bi bi-chat-dots"></i> Messages</a>
     </div>
-
-    <div class="row">
-        <!-- Notices Section -->
-        <div class="col-md-6 mb-4">
-            <div class="card shadow-sm h-100 p-3">
-                <h4>Notices</h4>
-                {% if notices %}
-                    <ul class="list-group list-group-flush mt-2">
-                        {% for notice in notices %}
-                            <li class="list-group-item">
-                                <strong>{{ notice.title }}</strong><br>
-                                <small class="text-muted">{{ notice.message }}</small>
-                            </li>
-                        {% endfor %}
-                    </ul>
-                {% else %}
-                    <p class="text-muted">No notices available.</p>
-                {% endif %}
-            </div>
+  </nav>
+  <div id="parentMain" class="flex-grow-1" style="margin-left:0; transition:margin-left .3s ease;">
+    <div class="container-fluid mt-3">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <div class="d-flex align-items-center gap-3">
+          <button id="parentSidebarToggle"><i class="bi bi-list"></i></button>
+          <h3 class="mb-0">Welcome {{ parent.user.first_name }}!</h3>
         </div>
-
-        <!-- Messaging Section -->
-        <div class="col-md-6 mb-4">
-            <div class="card shadow-sm h-100 d-flex align-items-center justify-content-center p-4">
-                <div class="text-center">
-                    <h4 class="mb-3">Messaging</h4>
-                    <p class="text-muted">Chat with teachers or the admin directly.</p>
-                    <a href="{% url 'inbox' %}" class="btn btn-primary btn-lg">
-                        💬 Open Messages
-                    </a>
-                </div>
+      </div>
+      <div class="row g-3 mb-4">
+        <div class="col-sm-6 col-lg-4"><div class="p-stat bg-grad-a"><div><h3>{{ stats.children|default:0 }}</h3><h6>Children</h6></div><div class="icon"><i class="fa-solid fa-children"></i></div></div></div>
+        <div class="col-sm-6 col-lg-4"><div class="p-stat bg-grad-c"><div><h3>{{ stats.avg_attendance_pct|default:0 }}%</h3><h6>Avg Attendance</h6></div><div class="icon"><i class="fa-solid fa-user-check"></i></div></div></div>
+        <div class="col-sm-6 col-lg-4"><div class="p-stat bg-grad-d"><div><h3>{{ stats.notices|default:0 }}</h3><h6>Notices</h6></div><div class="icon"><i class="fa-solid fa-bell"></i></div></div></div>
+      </div>
+      <div class="row g-4">
+        <div class="col-xl-6" id="children">
+          <div class="card section-card h-100">
+            <div class="card-header"><span>Your Children (Today)</span></div>
+            <div class="card-body p-0">
+              {% if children %}
+              <ul class="list-group list-group-flush scroll-box">
+                {% for child in children %}
+                  <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <div class="d-flex align-items-center">
+                      {% include 'partials/user_avatar_name.html' with user_obj=child.user size=40 %}
+                      <div class="ms-2 small text-muted">Class {{ child.class_room.name }} {{ child.class_room.section }}</div>
+                    </div>
+                    <div>
+                      {% with today_att=attendance_map|get_item:child.id %}
+                        {% if today_att %}
+                          {% if today_att == 'present' %}<span class="badge bg-success child-badge">Present</span>{% elif today_att == 'absent' %}<span class="badge bg-danger child-badge">Absent</span>{% else %}<span class="badge bg-warning text-dark child-badge">Late</span>{% endif %}
+                        {% else %}<span class="text-muted small">Not marked</span>{% endif %}
+                      {% endwith %}
+                    </div>
+                  </li>
+                {% endfor %}
+              </ul>
+              {% else %}<div class="p-3 text-muted small">No children linked.</div>{% endif %}
             </div>
+          </div>
         </div>
+        <div class="col-xl-6" id="attendance">
+          <div class="card section-card h-100">
+            <div class="card-header"><span>Attendance Snapshot</span></div>
+            <div class="card-body p-0">
+              {% if children %}
+                <ul class="list-group list-group-flush scroll-box">
+                  {% for child in children %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                      <span>{{ child.user.first_name }}</span>
+                      {% with today_att=attendance_map|get_item:child.id %}
+                        {% if today_att %}
+                          {% if today_att == 'present' %}<span class="badge bg-success child-badge">Present</span>{% elif today_att == 'absent' %}<span class="badge bg-danger child-badge">Absent</span>{% else %}<span class="badge bg-warning text-dark child-badge">Late</span>{% endif %}
+                        {% else %}<span class="text-muted small">-</span>{% endif %}
+                      {% endwith %}
+                    </li>
+                  {% endfor %}
+                </ul>
+              {% else %}<div class="p-3 text-muted small">No data.</div>{% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="row g-4 mt-1">
+        <div class="col-lg-7" id="notices">
+          <div class="card section-card h-100">
+            <div class="card-header"><span>Recent Notices</span></div>
+            <div class="card-body p-0">
+              {% if notices %}
+                <ul class="list-group list-group-flush scroll-box">
+                  {% for notice in notices %}
+                    <li class="list-group-item">
+                      <strong>{{ notice.title|truncatechars:40 }}</strong><br>
+                      <small class="text-muted">{{ notice.message|truncatechars:90 }}</small>
+                    </li>
+                  {% endfor %}
+                </ul>
+              {% else %}<div class="p-3 text-muted small">No notices available.</div>{% endif %}
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-5" id="messages">
+          <div class="card section-card h-100">
+            <div class="card-header"><span>Messaging</span></div>
+            <div class="card-body d-flex flex-column justify-content-center text-center">
+              <p class="text-muted small mb-3">Chat with teachers or admin.</p>
+              <a href="{% url 'inbox' %}" class="role-btn"><span><i class="bi bi-chat-right-dots"></i> Inbox</span></a>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
+  </div>
 </div>
+<script>
+  const pToggle = document.getElementById('parentSidebarToggle');
+  const pSidebar = document.getElementById('parentSidebar');
+  const pMain = document.getElementById('parentMain');
+  pToggle.addEventListener('click',()=>{ pSidebar.classList.toggle('active'); pMain.style.marginLeft = pSidebar.classList.contains('active')? '240px':'0'; });
+  document.querySelectorAll('#parentSidebar .nav-link').forEach(l=>l.addEventListener('click',()=>{ if(window.innerWidth<992){ pSidebar.classList.remove('active'); pMain.style.marginLeft='0'; }}));
+</script>
 {% endblock %}

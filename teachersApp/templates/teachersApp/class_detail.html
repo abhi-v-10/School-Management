@@ -1,15 +1,14 @@
 {% extends "base.html" %}
 {% block title %}{{ classroom.name }} - Attendance{% endblock %}
 {% block content %}
-<div class="card shadow-sm p-4">
     <h3 class="mb-3">{{ classroom.name }} {{ classroom.section }}</h3>
     <p class="text-muted mb-4">Mark attendance for <strong>{{ today }}</strong></p>
 
     <form method="POST">
         {% csrf_token %}
         <div class="table-responsive">
-            <table class="table align-middle mb-0">
-                <thead class="table-light">
+            <table class="table table-modern table-hover align-middle mb-0">
+                <thead>
                     <tr>
                         <th>Student</th>
                         <th>Status</th>
@@ -20,7 +19,7 @@
                 <tbody>
                     {% for student in students %}
                     <tr>
-                        <td>{{ student.user.first_name }} {{ student.user.last_name }}</td>
+                        <td>{% include 'partials/user_avatar_name.html' with user_obj=student.user size=32 %}</td>
                         <td style="max-width:180px;">
                             <select name="status_{{ student.id }}" class="form-select">
                                 <option value="">-- Select --</option>
@@ -31,18 +30,16 @@
                         </td>
                         <td>
                             {% if student.parent %}
-                                <a href="{% url 'conversation' student.parent.user.id %}"
-                                   class="btn btn-sm btn-outline-secondary">
-                                    <i class="bi bi-chat-dots"></i> Message Parent
+                                <a href="{% url 'conversation' student.parent.user.id %}" class="role-btn">
+                                    <span><i class="bi bi-chat-dots"></i> Message Parent</span>
                                 </a>
                             {% else %}
                                 <span class="text-muted">No parent linked</span>
                             {% endif %}
                         </td>
                         <td class="text-end">
-                            <a href="{% url 'student_attendance_history' student.id %}"
-                               class="btn btn-sm btn-outline-primary">
-                                <i class="bi bi-clock-history"></i> History
+                            <a href="{% url 'student_attendance_history' student.id %}" class="role-btn">
+                                <span><i class="bi bi-clock-history"></i> History</span>
                             </a>
                         </td>
                     </tr>
@@ -50,11 +47,11 @@
                 </tbody>
             </table>
         </div>
-        <div class="mt-4 text-end">
-            <button type="submit" class="btn btn-success">
-                <i class="bi bi-check2-circle"></i> Save Attendance
+        <div class="d-flex gap-2 mt-4 justify-content-end">
+            <button type="submit" class="role-btn"><span>
+                <i class="bi bi-check2-circle"></i><i class="bi bi-check2-all"></i> Save</span>
             </button>
+            <a class="role-btn" href="{% url 'dashboard_teacher' %}"><span>← Back</span></a>
         </div>
     </form>
-</div>
 {% endblock %}

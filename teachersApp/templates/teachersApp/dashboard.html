@@ -1,136 +1,134 @@
 {% extends "base.html" %}
+{% block title %}Teacher Dashboard{% endblock %}
+{% block extra_css %}
+<style>
+/* Sidebar (reuse styling approach) */
+.teacher-sidebar { width:240px; background:#fff; border-right:1px solid #e9ecef; position:fixed; top:0; bottom:0; left:-240px; padding-top:60px; transition:all .3s ease; z-index:1040; }
+.teacher-sidebar.active { left:0; }
+.teacher-sidebar .nav-link { color:#333; padding:12px 20px; display:flex; align-items:center; font-weight:500; }
+.teacher-sidebar .nav-link i { margin-right:10px; }
+.teacher-sidebar .nav-link.active, .teacher-sidebar .nav-link:hover { background:#f1f5f9; color:var(--accent); }
+#teacherSidebarToggle { border:none; background:transparent; font-size:1.6rem; cursor:pointer; }
+/* Gradient Stat Cards */
+.t-stat { border-radius:14px; color:#fff; padding:18px 20px; position:relative; overflow:hidden; display:flex; align-items:center; justify-content:space-between; box-shadow:0 4px 12px rgba(0,0,0,.12); transition:transform .25s ease, box-shadow .25s ease; }
+.t-stat:hover { transform:translateY(-6px); box-shadow:0 10px 26px rgba(0,0,0,.18); }
+.t-stat .icon { font-size:2.3rem; opacity:.9; }
+.t-stat h3 { margin:0; font-size:2rem; font-weight:700; line-height:1; }
+.t-stat h6 { margin:0; font-size:.75rem; font-weight:600; letter-spacing:.7px; text-transform:uppercase; opacity:.9; }
+.bg-grad-a { background:linear-gradient(45deg,#667eea,#764ba2); }
+.bg-grad-b { background:linear-gradient(45deg,#f093fb,#f5576c); }
+.bg-grad-c { background:linear-gradient(45deg,#4facfe,#00f2fe); }
+.bg-grad-d { background:linear-gradient(45deg,#ff9a44,#fc6076); }
+/* Modular cards */
+.section-card { border-radius:14px; border:1px solid #e5e7eb; }
+.section-card .card-header { background:#fff; border-bottom:1px solid #eef0f2; font-weight:600; display:flex; justify-content:space-between; align-items:center; }
+/* Tables / lists */
+.table-modern thead { background:linear-gradient(45deg,#1875FF,#4facfe); color:#fff; }
+.scroll-box { max-height:320px; overflow-y:auto; }
+</style>
+{% endblock %}
 {% block content %}
-<div class="container mt-4">
-    <h2 class="mb-4">Welcome, {{ teacher.user.first_name }} 👨‍🏫</h2>
-
-    <div class="row">
-        <!-- Classes Section -->
-        <div class="col-md-4 mb-4">
-    <div class="card shadow-sm h-100">
-        <div class="card-body">
-            <h4 class="card-title mb-3">Your Classes</h4>
-            {% if classes %}
-                <ul class="list-group list-group-flush">
-                    {% for cls in classes %}
-                        <li class="list-group-item">
-                            <a href="{% url 'teacher_class_detail' cls.id %}">
-                                {{ cls.name }} {{ cls.section }}
-                            </a>
-                        </li>
-                    {% endfor %}
+<div class="d-flex">
+  <nav id="teacherSidebar" class="teacher-sidebar">
+    <div class="nav flex-column">
+      <div class="px-3 pt-2 pb-1 text-uppercase small text-muted">Menu</div>
+      <a class="nav-link active" href="{% url 'dashboard_teacher' %}"><i class="bi bi-speedometer2"></i> Dashboard</a>
+      <a class="nav-link" href="{% url 'inbox' %}"><i class="bi bi-chat-dots"></i> Inbox</a>
+      <a class="nav-link" href="#classes"><i class="bi bi-people"></i> Classes</a>
+      <a class="nav-link" href="#subjects"><i class="bi bi-journal"></i> Subjects</a>
+      <a class="nav-link" href="{% url 'teacher_exams_list' %}"><i class="bi bi-journal-check"></i> Exams</a>
+      <a class="nav-link" href="#notices"><i class="bi bi-bell"></i> Notices</a>
+    </div>
+  </nav>
+  <div id="teacherMain" class="flex-grow-1" style="margin-left:0; transition:margin-left .3s ease;">
+    <div class="container-fluid mt-3">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <div class="d-flex align-items-center gap-3">
+          <button id="teacherSidebarToggle"><i class="bi bi-list"></i></button>
+          <h3 class="mb-0">Welcome {{ teacher.user.first_name }}!</h3>
+        </div>
+      </div>
+      <!-- Stats Row -->
+      <div class="row g-3 mb-4">
+        <div class="col-sm-6 col-lg-3"><div class="t-stat bg-grad-a position-relative"><div><h3>{{ stats.classes|default:0 }}</h3><h6>Classes</h6></div><div class="icon"><i class="fa-solid fa-chalkboard"></i></div></div></div>
+        <div class="col-sm-6 col-lg-3"><div class="t-stat bg-grad-b position-relative"><div><h3>{{ stats.subjects|default:0 }}</h3><h6>Subjects</h6></div><div class="icon"><i class="fa-solid fa-book-open"></i></div></div></div>
+        <div class="col-sm-6 col-lg-3"><div class="t-stat bg-grad-c position-relative"><div><h3>{{ stats.students|default:0 }}</h3><h6>Students</h6></div><div class="icon"><i class="fa-solid fa-user-graduate"></i></div></div></div>
+        <div class="col-sm-6 col-lg-3"><div class="t-stat bg-grad-d position-relative"><div><h3>{{ stats.upcoming_exams|default:0 }}</h3><h6>Exams</h6></div><div class="icon"><i class="fa-solid fa-file-pen"></i></div></div></div>
+      </div>
+      <div class="row g-4">
+        <div class="col-xl-4" id="classes">
+          <div class="card section-card h-100">
+            <div class="card-header"><span>Your Classes</span></div>
+            <div class="card-body p-0">
+              {% if classes %}
+              <ul class="list-group list-group-flush scroll-box">
+                {% for cls in classes %}
+                  <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <span><i class="bi bi-door-open me-1 text-primary"></i>{{ cls.name }} {{ cls.section }}</span>
+                    <a href="{% url 'teacher_class_detail' cls.id %}" class="btn btn-sm btn-outline-primary">Open</a>
+                  </li>
+                {% endfor %}
+              </ul>
+              {% else %}<div class="p-3 text-muted small">No classes assigned.</div>{% endif %}
+            </div>
+          </div>
+        </div>
+        <div class="col-xl-4" id="subjects">
+          <div class="card section-card h-100">
+            <div class="card-header"><span>Subjects</span></div>
+            <div class="card-body p-0">
+              {% if subjects %}
+                <ul class="list-group list-group-flush scroll-box">
+                  {% for sub in subjects %}<li class="list-group-item"><i class="bi bi-journal-text me-1 text-success"></i>{{ sub.subject }}</li>{% endfor %}
                 </ul>
-            {% else %}
-                <p class="text-muted">No classes assigned yet.</p>
-            {% endif %}
+              {% else %}<div class="p-3 text-muted small">No subjects yet.</div>{% endif %}
+            </div>
+          </div>
         </div>
+        <div class="col-xl-4" id="exams">
+          <div class="card section-card h-100">
+            <div class="card-header"><span>Upcoming Exams</span><a href="{% url 'teacher_exams_list' %}" class="btn btn-sm btn-outline-primary">All</a></div>
+            <div class="card-body p-0">
+              {% if exams %}
+                <ul class="list-group list-group-flush scroll-box">
+                  {% for exam in exams %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                      <div><strong>{{ exam.subject.subject }}</strong><br><small class="text-muted">{{ exam.class_room.name }}-{{ exam.class_room.section }} • {{ exam.exam_date|date:"d M" }}</small></div>
+                      <span class="badge bg-light text-dark border">{{ exam.max_marks }}</span>
+                    </li>
+                  {% endfor %}
+                </ul>
+              {% else %}<div class="p-3 text-muted small">No scheduled exams.</div>{% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="row g-4 mt-1">
+        <div class="col-lg-12" id="notices">
+          <div class="card section-card h-100">
+            <div class="card-header"><span>Recent Notices</span><a href="{% url 'notice_list' %}" class="btn btn-sm btn-outline-secondary">All</a></div>
+            <div class="card-body p-0">
+              {% if notices %}
+                <ul class="list-group list-group-flush scroll-box">
+                  {% for notice in notices %}
+                    <li class="list-group-item">
+                      <strong>{{ notice.title|truncatechars:40 }}</strong><br>
+                      <small class="text-muted">{{ notice.created_at|date:"d M" }}</small>
+                    </li>
+                  {% endfor %}
+                </ul>
+              {% else %}<div class="p-3 text-muted small">No notices.</div>{% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
+  </div>
 </div>
-
-        <!-- Subjects Section -->
-        <div class="col-md-4 mb-4">
-            <div class="card shadow-sm h-100">
-                <div class="card-body">
-                    <h4 class="card-title mb-3">Subjects You Teach</h4>
-                    {% if subjects %}
-                        <ul class="list-group list-group-flush">
-                            {% for sub in subjects %}
-                                <li class="list-group-item">{{ sub.subject }}</li>
-                            {% endfor %}
-                        </ul>
-                    {% else %}
-                        <p class="text-muted">No subjects assigned yet.</p>
-                    {% endif %}
-                </div>
-            </div>
-        </div>
-
-        <!-- Upcoming Exams Section -->
-        <div class="col-md-4 mb-4">
-            <div class="card shadow-sm h-100">
-                <div class="card-body">
-                    <h4 class="card-title mb-3">Upcoming Exams</h4>
-                    {% if exams %}
-                        <ul class="list-group list-group-flush">
-                            {% for exam in exams %}
-                                <li class="list-group-item">
-                                    <strong>{{ exam.subject.name }}</strong><br>
-                                    <small class="text-muted">{{ exam.class_room.name }} - {{ exam.exam_date }}</small>
-                                </li>
-                            {% endfor %}
-                        </ul>
-                    {% else %}
-                        <p class="text-muted">No upcoming exams scheduled.</p>
-                    {% endif %}
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Results Section -->
-    <div class="row mt-4">
-        <div class="col-12">
-            <div class="card shadow-sm">
-                <div class="card-body">
-                    <h4 class="card-title mb-3">Recent Student Results</h4>
-                    {% if results %}
-                        <table class="table table-striped">
-                            <thead>
-                                <tr>
-                                    <th>Student</th>
-                                    <th>Class</th>
-                                    <th>Subject</th>
-                                    <th>Score (%)</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for res in results %}
-                                    <tr>
-                                        <td>{{ res.student.user.first_name }} {{ res.student.user.last_name }}</td>
-                                        <td>{{ res.exam.class_room.name }}</td>
-                                        <td>{{ res.exam.subject.subject }}</td>
-                                        <td>{{ res.score }}</td>
-                                    </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    {% else %}
-                        <p class="text-muted">No results recorded yet.</p>
-                    {% endif %}
-                </div>
-            </div>
-        </div>
-    </div>
-    <!-- Notices Section -->
-    <div class="row mt-4">
-        <!-- Notices -->
-        <div class="col-md-6 mb-3">
-            <div class="card shadow-sm p-3 h-100">
-                <h4>Notices</h4>
-                {% if notices %}
-                    <ul class="list-group list-group-flush mt-2">
-                        {% for notice in notices %}
-                            <li class="list-group-item">
-                                <strong>{{ notice.title }}</strong><br>
-                                <small class="text-muted">{{ notice.message }}</small>
-                            </li>
-                        {% endfor %}
-                    </ul>
-                {% else %}
-                    <p class="text-muted">No notices available.</p>
-                {% endif %}
-            </div>
-        </div>
-
-        <!-- Messaging -->
-        <div class="col-md-6 mb-3">
-            <div class="card shadow-sm p-3 h-100 d-flex align-items-center justify-content-center">
-                <h4 class="mb-3">Messaging</h4>
-                <a href="{% url 'inbox' %}" class="btn btn-primary btn-lg">
-                    <i class="bi bi-chat-dots-fill"></i> Go to Inbox
-                </a>
-            </div>
-        </div>
-    </div>
-
-</div>
+<script>
+  const tToggle = document.getElementById('teacherSidebarToggle');
+  const tSidebar = document.getElementById('teacherSidebar');
+  const tMain = document.getElementById('teacherMain');
+  tToggle.addEventListener('click',()=>{ tSidebar.classList.toggle('active'); tMain.style.marginLeft = tSidebar.classList.contains('active')? '240px':'0'; });
+</script>
 {% endblock %}

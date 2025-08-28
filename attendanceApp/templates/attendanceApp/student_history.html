@@ -2,13 +2,14 @@
 {% block title %}Attendance History{% endblock %}
 {% block content %}
 <div class="card shadow-sm p-4">
-    <h3 class="mb-3">
+    <h3 class="mb-3 d-flex align-items-center gap-2">
+        {% include 'partials/user_avatar_name.html' with user_obj=student.user size=46 %}
         Attendance - {{ student.user.first_name }} {{ student.user.last_name }}
     </h3>
 
     <div class="table-responsive">
-        <table class="table align-middle mb-0">
-            <thead class="table-light">
+        <table class="table table-modern table-hover align-middle mb-0">
+            <thead>
                 <tr>
                     <th>Date</th>
                     <th>Status</th>
@@ -28,7 +29,7 @@
                             <span class="badge bg-warning text-dark">Late</span>
                         {% endif %}
                     </td>
-                    <td>{{ record.teacher.user.first_name }} {{ record.teacher.user.last_name }}</td>
+                    <td>{% include 'partials/user_avatar_name.html' with user_obj=record.teacher.user size=30 %}</td>
                 </tr>
                 {% empty %}
                 <tr>
@@ -39,4 +40,5 @@
         </table>
     </div>
 </div>
+<button class="role-btn mt-4" onclick="window.history.back();"><span>← Back</span></button>
 {% endblock %}

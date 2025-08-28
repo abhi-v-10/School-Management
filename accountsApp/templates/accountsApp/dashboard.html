@@ -1,65 +1,485 @@
+{#{% extends "base.html" %}#}
+{#{% block title %}Admin Dashboard{% endblock %}#}
+{#{% block extra_css %}#}
+{#    <style>#}
+{#    /* Dashboard stat cards */#}
+{#.stat-card {#}
+{#  border-radius: 16px;#}
+{#  padding: 20px;#}
+{#  color: #fff;#}
+{#  display: flex;#}
+{#  align-items: center;#}
+{#  justify-content: space-between;#}
+{#  box-shadow: 0 4px 12px rgba(0,0,0,0.1);#}
+{#  transition: transform 0.2s ease, box-shadow 0.2s ease;#}
+{#}#}
+{#.stat-card:hover {#}
+{#  transform: translateY(-5px);#}
+{#  box-shadow: 0 8px 18px rgba(0,0,0,0.15);#}
+{#}#}
+{#.stat-card .icon {#}
+{#  font-size: 2.5rem;#}
+{#  opacity: 0.9;#}
+{#}#}
+{#.stat-card .details h4 {#}
+{#  font-size: 1.2rem;#}
+{#  margin: 0;#}
+{#}#}
+{#.stat-card .details p {#}
+{#  font-size: 2rem;#}
+{#  margin: 0;#}
+{#  font-weight: 600;#}
+{#}#}
+{#.bg-gradient-students {#}
+{#  background: linear-gradient(135deg, #ff9966, #ff5e62);#}
+{#}#}
+{#.bg-gradient-teachers {#}
+{#  background: linear-gradient(135deg, #6a11cb, #2575fc);#}
+{#}#}
+{#.bg-gradient-parents {#}
+{#  background: linear-gradient(135deg, #11998e, #38ef7d);#}
+{#}#}
+{#.bg-gradient-notifications {#}
+{#  background: linear-gradient(135deg, #f7971e, #ffd200);#}
+{#}#}
+{##}
+{#</style>#}
+{##}
+{#{% endblock %}#}
+{#{% block content %}#}
+{#<div class="container my-4">#}
+{#<div class="row g-4 mb-4">#}
+{#  <div class="col-md-3">#}
+{#    <div class="stat-card bg-gradient-students">#}
+{#      <div class="icon"><i class="bi bi-mortarboard"></i></div>#}
+{#      <div class="details">#}
+{#        <h4>Students</h4>#}
+{#        <p>{{ student_count }}</p>#}
+{#      </div>#}
+{#      <a href="{% url 'admin_students_list' %}" class="stretched-link"></a>#}
+{#    </div>#}
+{#  </div>#}
+{##}
+{#  <div class="col-md-3">#}
+{#    <div class="stat-card bg-gradient-teachers">#}
+{#      <div class="icon"><i class="bi bi-person-badge"></i></div>#}
+{#      <div class="details">#}
+{#        <h4>Teachers</h4>#}
+{#        <p>{{ teacher_count }}</p>#}
+{#      </div>#}
+{#      <a href="{% url 'admin_teachers_list' %}" class="stretched-link"></a>#}
+{#    </div>#}
+{#  </div>#}
+{##}
+{#  <div class="col-md-3">#}
+{#    <div class="stat-card bg-gradient-parents">#}
+{#      <div class="icon"><i class="bi bi-people"></i></div>#}
+{#      <div class="details">#}
+{#        <h4>Parents</h4>#}
+{#        <p>{{ parent_count }}</p>#}
+{#      </div>#}
+{#      <a href="{% url 'admin_parents_list' %}" class="stretched-link"></a>#}
+{#    </div>#}
+{#  </div>#}
+{##}
+{#  <div class="col-md-3">#}
+{#    <div class="stat-card bg-gradient-notifications">#}
+{#      <div class="icon"><i class="bi bi-bell"></i></div>#}
+{#      <div class="details">#}
+{#        <h4>Notifications</h4>#}
+{#        <p>{{ notification_count }}</p>#}
+{#      </div>#}
+{#      <a href="{% url 'notifications_list' %}" class="stretched-link"></a>#}
+{#    </div>#}
+{#  </div>#}
+{#</div>#}
+{##}
+{#    <div class="d-flex justify-content-between align-items-center mb-4">#}
+{#        <h2 class="mb-0">Admin Dashboard</h2>#}
+{#        <div>#}
+{#            <a href="{% url 'inbox' %}" class="role-btn me-2">#}
+{#                <span><i class="bi bi-chat-right-dots"></i> Messaging</span>#}
+{#            </a>#}
+{#            <a href="{% url 'notice_list' %}" class="role-btn">#}
+{#                <span><i class="bi bi-megaphone"></i> View Notices</span>#}
+{#            </a>#}
+{#        </div>#}
+{#    </div>#}
+{##}
+{#    <div class="row">#}
+{#      <div class="col-md-3 mb-3">#}
+{#        <div class="card card-hover shadow-sm text-center p-3 position-relative">#}
+{#          <h4>Students</h4>#}
+{#          <p class="fs-3">{{ student_count }}</p>#}
+{#          <a href="{% url 'admin_students_list' %}" class="stretched-link"></a>#}
+{#        </div>#}
+{#      </div>#}
+{##}
+{#      <div class="col-md-3 mb-3">#}
+{#        <div class="card card-hover shadow-sm text-center p-3 position-relative">#}
+{#          <h4>Teachers</h4>#}
+{#          <p class="fs-3">{{ teacher_count }}</p>#}
+{#          <a href="{% url 'admin_teachers_list' %}" class="stretched-link"></a>#}
+{#        </div>#}
+{#      </div>#}
+{##}
+{#      <div class="col-md-3 mb-3">#}
+{#        <div class="card card-hover shadow-sm text-center p-3 position-relative">#}
+{#          <h4>Classes</h4>#}
+{#          <p class="fs-3">{{ class_count }}</p>#}
+{#          <a href="{% url 'admin_classes_list' %}" class="stretched-link"></a>#}
+{#        </div>#}
+{#      </div>#}
+{##}
+{#      <div class="col-md-3 mb-3">#}
+{#        <div class="card card-hover shadow-sm text-center p-3 position-relative">#}
+{#          <h4>Exams</h4>#}
+{#          <p class="fs-3">{{ exam_count }}</p>#}
+{#          <a href="{% url 'admin_exams_list' %}" class="stretched-link"></a>#}
+{#        </div>#}
+{#      </div>#}
+{#    </div>#}
+{##}
+{#    <hr>#}
+{##}
+{#    <h4>Upcoming Exams</h4>#}
+{#    <ul class="list-group">#}
+{#        {% for exam in recent_exams %}#}
+{#        <li class="list-group-item">#}
+{#            {{ exam.subject }} - {{ exam.class_room }} on {{ exam.exam_date }}#}
+{#        </li>#}
+{#        {% empty %}#}
+{#        <li class="list-group-item">No upcoming exams</li>#}
+{#        {% endfor %}#}
+{#    </ul>#}
+{#</div>#}
+{#{% endblock %}#}
+
+
 {% extends "base.html" %}
 {% block title %}Admin Dashboard{% endblock %}
+{% block extra_css %}
+<style>
+/* Sidebar */
+.sidebar {
+  width: 240px;
+  background: #fff;
+  border-right: 1px solid #e9ecef;
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: -240px;
+  transition: all 0.3s ease;
+  z-index: 1050;
+  padding-top: 60px;
+}
+.sidebar.active {
+  left: 0;
+}
+.sidebar .nav-link {
+  color: #333;
+  padding: 12px 20px;
+  display: flex;
+  align-items: center;
+  font-weight: 500;
+}
+.sidebar .nav-link i {
+  margin-right: 10px;
+}
+.sidebar .nav-link.active {
+  background: #f1f5f9;
+  color: #1875FF;
+  font-weight: 600;
+}
+
+/* Toggle Button */
+#sidebarToggle {
+  border: none;
+  background: transparent;
+  font-size: 1.5rem;
+  cursor: pointer;
+}
+
+/* Dashboard Stat Cards */
+.card-stat {
+  border-radius: 12px;
+  color: #fff;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+.card-stat:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+}
+.card-stat .icon {
+  font-size: 2.5rem;
+  opacity: 0.9;
+}
+.card-stat .info h3 {
+  font-size: 2.2rem;
+  margin: 0;
+  font-weight: 700;
+}
+.card-stat .info h6 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 500;
+}
+.bg-students { background: linear-gradient(45deg, #667eea, #764ba2); }
+.bg-teachers { background: linear-gradient(45deg, #f093fb, #f5576c); }
+.bg-classes { background: linear-gradient(45deg, #4facfe, #00f2fe); }
+.bg-notices { background: linear-gradient(45deg, #ff9a44, #fc6076); }
+
+.activity-box { max-height: 350px; overflow-y: auto; }
+
+/* Modern Table Styling */
+.table-modern thead {
+background: linear-gradient(45deg, #1875FF, #4facfe);
+color: #fff;
+font-weight: 600;
+}
+.table-modern thead th {
+border: none;
+padding: 12px;
+}
+.table-modern tbody tr {
+  transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+.table-modern tbody tr:hover {
+  background-color: #f8faff;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.06);
+  transform: translateY(-2px); /* hover animation without horizontal growth */
+}
+.table-modern td {
+vertical-align: middle;
+padding: 12px;
+border-bottom: 1px solid #f1f1f1;
+}
+.table-modern .avatar-circle {
+width: 36px;
+height: 36px;
+border-radius: 50%;
+display: flex;
+align-items: center;
+justify-content: center;
+font-weight: 600;
+}
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="container my-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="mb-0">Admin Dashboard</h2>
-        <div>
-            <a href="{% url 'inbox' %}" class="btn btn-outline-primary me-2">
-                💬 Messaging
-            </a>
-            <a href="{% url 'notice_list' %}" class="btn btn-primary">
-                📢 View Notices
-            </a>
+<div class="d-flex">
+  <!-- Sidebar -->
+  <div id="sidebar" class="sidebar">
+    <nav class="nav flex-column">
+      <div class="px-3 pt-2 pb-1 text-uppercase small text-muted">Main Menu</div>
+      <a class="nav-link active" href="{% url 'dashboard_admin' %}"><i class="bi bi-speedometer2"></i> Dashboard</a>
+      <a class="nav-link" href="{% url 'admin_students_list' %}"><i class="bi bi-mortarboard"></i> Students</a>
+      <a class="nav-link" href="{% url 'admin_teachers_list' %}"><i class="bi bi-person-badge"></i> Teachers</a>
+      <a class="nav-link" href="{% url 'admin_classes_list' %}"><i class="bi bi-grid"></i> Classes</a>
+      <a class="nav-link" href="/admin/auth/user/"><i class="bi bi-people"></i> Users</a>
+      <div class="px-3 pt-3 pb-1 text-uppercase small text-muted">Management</div>
+      <a class="nav-link" href="{% url 'admin_exams_list' %}"><i class="bi bi-journal-check"></i> Exams</a>
+      <a class="nav-link" href="{% url 'admin_subjects_list' %}"><i class="bi bi-journal-bookmark"></i> Subjects</a>
+      <a class="nav-link" href="{% url 'notice_list' %}"><i class="bi bi-bell"></i> Notices</a>
+      <a class="nav-link" href="{% url 'inbox' %}"><i class="bi bi-chat-right-dots"></i> Messages</a>
+    </nav>
+  </div>
+
+  <!-- Main Content -->
+  <div class="flex-grow-1" style="margin-left:0; transition: margin-left 0.3s ease;" id="mainContent">
+    <div class="container-fluid mt-3">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <div class="d-flex align-items-center gap-3">
+          <button id="sidebarToggle"><i class="bi bi-list"></i></button>
+          <h3 class="page-title mb-0">Welcome Admin!</h3>
         </div>
+      </div>
+
+      <!-- Stat Cards -->
+      <div class="row mb-4">
+        <div class="col-md-3">
+          <div class="card-stat bg-students position-relative">
+            <div class="icon"><i class="fa-solid fa-user-graduate"></i></div>
+            <div class="info"><h3>{{ student_count|default:0 }}</h3><h6>Total Students</h6></div>
+            <a class="stretched-link" href="{% url 'admin_students_list' %}"></a>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="card-stat bg-teachers position-relative">
+            <div class="icon"><i class="fa-solid fa-chalkboard-user"></i></div>
+            <div class="info"><h3>{{ teacher_count|default:0 }}</h3><h6>Total Teachers</h6></div>
+            <a class="stretched-link" href="{% url 'admin_teachers_list' %}"></a>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="card-stat bg-classes position-relative">
+            <div class="icon"><i class="fa-solid fa-people-roof"></i></div>
+            <div class="info"><h3>{{ class_count|default:0 }}</h3><h6>Total Classes</h6></div>
+            <a class="stretched-link" href="{% url 'admin_classes_list' %}"></a>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="card-stat bg-notices position-relative">
+            <div class="icon"><i class="fa-solid fa-bell"></i></div>
+            <div class="info"><h3>{{ notification_count|default:0 }}</h3><h6>Notices</h6></div>
+            <a class="stretched-link" href="{% url 'notice_list' %}"></a>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-lg-8">
+          <!-- Recent / Upcoming Exams -->
+          <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+              <h5 class="mb-0">Upcoming Exams</h5>
+              <div class="d-flex gap-2">
+                  <a href="{% url 'admin_exam_create' %}" class="role-btn"><span>New Exam</span></a>
+                  <a href="{% url 'admin_exams_list' %}" class="role-btn"><span>View All</span></a>
+              </div>
+            </div>
+            <div class="card-body">
+              {% if recent_exams %}
+              <div class="table-responsive">
+                <table class="table table-modern table-hover align-middle mb-0">
+                  <thead>
+                    <tr>
+                      <th scope="col">Subject</th>
+                      <th scope="col">Class</th>
+                      <th scope="col">Date</th>
+                      <th scope="col">Max Marks</th>
+                      <th scope="col" class="text-end">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                  {% for exam in recent_exams %}
+                    <tr>
+                      <td><span class="fw-semibold">{{ exam.subject.subject }}</span></td>
+                      <td><span class="badge bg-info">{{ exam.class_room.name }}-{{ exam.class_room.section }}</span></td>
+                      <td><small class="text-muted">{{ exam.exam_date|date:"d M Y" }}</small></td>
+                      <td>{{ exam.max_marks }}</td>
+                      <td class="text-end">
+                        <a href="{% url 'admin_exam_edit' exam.pk %}" class="btn btn-sm btn-outline-danger" title="Edit"><i class="bi bi-pencil"></i></a>
+                      </td>
+                    </tr>
+                  {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+              {% else %}
+              <div class="text-center py-4">
+                <i class="bi bi-file-earmark-text fs-1 text-muted"></i>
+                <p class="text-muted mb-2">No exams found</p>
+                <a href="{% url 'admin_exam_create' %}" class="btn btn-primary btn-sm">Create Exam</a>
+              </div>
+              {% endif %}
+            </div>
+          </div>
+          <!-- Recently Added Students -->
+          <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Recently Added Students</h5>
+                    <a href="{% url 'admin_students_list' %}" class="role-btn"><span>View All</span></a>
+                </div>
+                <div class="card-body">
+                {% if recent_students %}
+                    <div class="table-responsive">
+                        <table class="table table-modern table-hover align-middle mb-0">
+                        <thead>
+                        <tr>
+                        <th scope="col">Name</th>
+                        <th scope="col">Class</th>
+                        <th scope="col">Parent</th>
+                        <th scope="col">Admission Date</th>
+                        <th scope="col" class="text-end">Action</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for student in recent_students %}
+                        <tr>
+                        <td>
+                        {% include 'partials/user_avatar_name.html' with user_obj=student.user size=36 %}
+                        </td>
+                        <td><span class="badge bg-info">{{ student.class_room|default:"-" }}</span></td>
+                        <td>{% if student.parent %}{{ student.parent.user.get_full_name|default:student.parent.user.username }}{% else %}-{% endif %}</td>
+                        <td><small class="text-muted">{{ student.admission_date|date:"d M Y" }}</small></td>
+                        <td class="text-end">
+                        <a href="{% url 'admin_student_detail' student.pk %}" class="btn btn-sm btn-outline-success me-1" title="View"><i class="bi bi-eye"></i></a>
+                        <a href="{% url 'admin_student_edit' student.pk %}" class="btn btn-sm btn-outline-danger" title="Edit"><i class="bi bi-pencil"></i></a>
+                        </td>
+                        </tr>
+                        {% endfor %}
+                        </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-4">
+                        <i class="bi bi-mortarboard fs-1 text-muted"></i>
+                        <p class="text-muted">No students found</p>
+                        <a href="{% url 'register_student' %}" class="btn btn-primary">Add First Student</a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column -->
+        <div class="col-lg-4">
+          <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+              <h5 class="mb-0">Recent Notices</h5>
+                <a href="{% url 'notice_list' %}" class="role-btn"><span>View All</span></a>
+            </div>
+            <div class="card-body activity-box">
+              {% if recent_notifications %}
+                {% for notification in recent_notifications %}
+                <div class="d-flex justify-content-between align-items-center border-bottom py-2">
+                  <div>
+                    <strong>{{ notification.title|truncatechars:40 }}</strong><br>
+                    <small class="text-muted">{{ notification.created_at|date:"M d, Y" }}</small>
+                  </div>
+                  <span class="badge bg-secondary">{{ notification.created_at|timesince }} ago</span>
+                </div>
+                {% endfor %}
+              {% else %}
+                <div class="text-center py-4">
+                  <i class="bi bi-bell-slash fs-1 text-muted"></i>
+                  <p class="text-muted">No recent notices</p>
+                  <a href="{% url 'notice_create' %}" class="btn btn-sm btn-primary">Create First Notice</a>
+                </div>
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header"><h5 class="mb-0">System Overview</h5></div>
+            <div class="card-body">
+              <div class="d-flex justify-content-between py-2 border-bottom"><span><i class="bi bi-database text-primary"></i> Database Status</span><span class="badge bg-success">Active</span></div>
+              <div class="d-flex justify-content-between py-2 border-bottom"><span><i class="bi bi-server text-info"></i> Server Status</span><span class="badge bg-success">Running</span></div>
+              <div class="d-flex justify-content-between py-2 border-bottom"><span><i class="bi bi-people text-warning"></i> Active Users</span><span class="badge bg-info">{{ active_users|default:0 }}</span></div>
+              <div class="d-flex justify-content-between py-2"><span><i class="bi bi-clock text-secondary"></i> Last Backup</span><span class="badge bg-warning">Today</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
-
-    <div class="row">
-      <div class="col-md-3 mb-3">
-        <div class="card shadow-sm text-center p-3 position-relative">
-          <h4>Students</h4>
-          <p class="fs-3">{{ student_count }}</p>
-          <a href="{% url 'admin_students_list' %}" class="stretched-link"></a>
-        </div>
-      </div>
-
-      <div class="col-md-3 mb-3">
-        <div class="card shadow-sm text-center p-3 position-relative">
-          <h4>Teachers</h4>
-          <p class="fs-3">{{ teacher_count }}</p>
-          <a href="{% url 'admin_teachers_list' %}" class="stretched-link"></a>
-        </div>
-      </div>
-
-      <div class="col-md-3 mb-3">
-        <div class="card shadow-sm text-center p-3 position-relative">
-          <h4>Classes</h4>
-          <p class="fs-3">{{ class_count }}</p>
-          <a href="{% url 'admin_classes_list' %}" class="stretched-link"></a>
-        </div>
-      </div>
-
-      <div class="col-md-3 mb-3">
-        <div class="card shadow-sm text-center p-3 position-relative">
-          <h4>Exams</h4>
-          <p class="fs-3">{{ exam_count }}</p>
-          <a href="{% url 'admin_exams_list' %}" class="stretched-link"></a>
-        </div>
-      </div>
-    </div>
-
-    <hr>
-
-    <h4>Upcoming Exams</h4>
-    <ul class="list-group">
-        {% for exam in recent_exams %}
-        <li class="list-group-item">
-            {{ exam.subject }} - {{ exam.class_room }} on {{ exam.exam_date }}
-        </li>
-        {% empty %}
-        <li class="list-group-item">No upcoming exams</li>
-        {% endfor %}
-    </ul>
+  </div>
 </div>
+
+<script>
+document.getElementById('sidebarToggle').addEventListener('click', function(){
+  document.getElementById('sidebar').classList.toggle('active');
+  const mainContent = document.getElementById('mainContent');
+  if(document.getElementById('sidebar').classList.contains('active')){
+    mainContent.style.marginLeft = '240px';
+  } else {
+    mainContent.style.marginLeft = '0';
+  }
+});
+</script>
 {% endblock %}

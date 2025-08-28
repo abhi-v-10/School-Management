@@ -5,12 +5,12 @@
 <div class="card shadow-sm p-4">
   <div class="d-flex justify-content-between align-items-center mb-3">
     <h3 class="mb-0">All Attendance Records</h3>
-    <a href="{% url 'dashboard_admin' %}" class="btn btn-outline-secondary btn-sm">← Back to Dashboard</a>
+    <a href="{% url 'dashboard_admin' %}" class="role-btn"><span>← Back to Dashboard</span></a>
   </div>
 
   <div class="table-responsive">
-    <table class="table table-striped align-middle mb-0">
-      <thead class="table-light">
+    <table class="table table-modern table-hover align-middle mb-0">
+      <thead>
         <tr>
           <th>Student</th>
           <th>Class</th>
@@ -22,7 +22,7 @@
       <tbody>
         {% for rec in records %}
         <tr>
-          <td>{{ rec.student.user.first_name }} {{ rec.student.user.last_name }}</td>
+          <td>{% include 'partials/user_avatar_name.html' with user_obj=rec.student.user size=32 %}</td>
           <td>{{ rec.student.class_room.name }} {{ rec.student.class_room.section }}</td>
           <td>{{ rec.date }}</td>
           <td>
@@ -36,7 +36,7 @@
           </td>
           <td>
             {% if rec.teacher %}
-              {{ rec.teacher.user.first_name }} {{ rec.teacher.user.last_name }}
+              {% include 'partials/user_avatar_name.html' with user_obj=rec.teacher.user size=32 %}
             {% else %}
               <span class="text-muted">N/A</span>
             {% endif %}
@@ -50,5 +50,8 @@
       </tbody>
     </table>
   </div>
+<div class="d-flex gap-2 mt-4">
+  <button class="role-btn" onclick="window.history.back();"><span>← Back</span></button>
+    </div>
 </div>
 {% endblock %}
