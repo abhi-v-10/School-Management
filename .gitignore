@@ -1,6 +1,4 @@
 .env
-/static
-/media
 db.sqlite3
 /.venv
 /.idea
