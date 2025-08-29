@@ -91,14 +91,30 @@ WSGI_APPLICATION = 'managementProject.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-DATABASES = {
-    "default": dj_database_url.parse(config("DATABASE_URL"))
-    }
-    # 'default': {
-    #     'ENGINE': 'django.db.backends.sqlite3',
-    #     'NAME': BASE_DIR / 'db.sqlite3',
-    # }
+# Use DATABASE_URL if provided (e.g. production). In local/dev, fall back to sqlite.
+_db_url = config('DATABASE_URL', default='').strip()
+if _db_url:
+    # parse the URL into a Django DATABASES dict, then add conn_max_age and SSL options
+    _parsed = dj_database_url.parse(_db_url)
+    # Set reasonable persistent connection age
+    _parsed['CONN_MAX_AGE'] = 600
+    # Ensure SSL is required (useful for Supabase). If the URL already contains sslmode, this is harmless.
+    opts = _parsed.get('OPTIONS', {})
+    # prefer existing sslmode if present, otherwise require it
+    if 'sslmode' not in opts:
+        opts['sslmode'] = 'require'
+    _parsed['OPTIONS'] = opts
 
+    DATABASES = {
+        'default': _parsed
+    }
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
 
 
 # Password validation
