@@ -12,6 +12,9 @@ gunicorn==23.0.0
 idna==3.10
 oauthlib==3.3.1
 packaging==25.0
+pillow==10.4.0
+psycopg2==2.9.10
+psycopg2-binary==2.9.10
 pycparser==2.22
 PyJWT==2.10.1
 python-decouple==3.8
@@ -25,4 +28,3 @@ sqlparse==0.5.3
 tzdata==2025.2
 urllib3==2.5.0
 whitenoise==6.9.0
-Pillow==10.4.0
