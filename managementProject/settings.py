@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 from pathlib import Path
 from decouple import config, RepositoryEnv
 import os
+import dj_database_url
 from django.contrib.messages import constants as messages
 
 
@@ -30,7 +31,7 @@ SECRET_KEY = config("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 AUTH_USER_MODEL = 'accountsApp.User'
-ALLOWED_HOSTS = ['127.0.0.1', 'https://schoolmanagement.onrender.com']
+ALLOWED_HOSTS = ['127.0.0.1', 'school-management-ayag.vercel.app']
 
 
 # Application definition
@@ -91,19 +92,13 @@ WSGI_APPLICATION = 'managementProject.wsgi.application'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'mydb',
-        'USER': 'postgres',
-        'PASSWORD': 'admin',
-        'HOST': 'localhost',   # or your DB server IP
-        'PORT': '5432',        # default PostgreSQL port
-    },
+    "default": dj_database_url.parse(config("DATABASE_URL"))
+    }
     # 'default': {
     #     'ENGINE': 'django.db.backends.sqlite3',
     #     'NAME': BASE_DIR / 'db.sqlite3',
     # }
-}
+
 
 
 # Password validation
