@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>{% block title %}School Management{% endblock %}</title>
+  <title>{% block title %}{% endblock %}</title>
 
   <!-- Bootstrap Icons -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
@@ -141,7 +141,7 @@
 {% block navbar %}
 <nav class="navbar navbar-expand-lg sticky-top">
     <div class="container">
-        <a class="navbar-brand" href="{% url 'home' %}">SchoolMS</a>
+        <a class="navbar-brand" href="{% url 'home' %}"><i class="fa-solid fa-graduation-cap"></i> Scholaroid</a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
             <span class="navbar-toggler-icon"></span>
         </button>
@@ -187,7 +187,7 @@
 
 <!-- Footer -->
 <footer>
-    &copy; {{ now|date:"Y" }} School Management System. All Rights Reserved.
+    &copy; {{ now|date:"Y" }} Scholaroid - School Management System. Made by ~ <a class = "text-muted" href="https://github.com/abhi-v-10" target="_blank"> Abhishyanth</a> .
 </footer>
 
 <!-- Scripts -->

@@ -3,6 +3,7 @@ from django.contrib.auth.forms import UserCreationForm
 from .models import *
 from django.contrib.auth import get_user_model
 from parentsApp.models import Parent
+from django.contrib.auth import password_validation
 
 class AdminRegistrationForm(UserCreationForm):
     class Meta:
@@ -103,3 +104,43 @@ class ProfileForm(forms.ModelForm):
             parent.phone_number = self.cleaned_data.get('phone_number', '') or ''
             parent.save()
         return user
+
+class ChangePasswordForm(forms.Form):
+    current_password = forms.CharField(
+        label="Current Password",
+        widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Enter current password'}),
+        required=True
+    )
+    new_password1 = forms.CharField(
+        label="New Password",
+        widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Enter new password'}),
+        required=True
+    )
+    new_password2 = forms.CharField(
+        label="Confirm New Password",
+        widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Confirm new password'}),
+        required=True
+    )
+
+    def __init__(self, user, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.user = user
+
+    def clean_current_password(self):
+        current_password = self.cleaned_data.get('current_password')
+        if not self.user.check_password(current_password):
+            raise forms.ValidationError('Current password is incorrect.')
+        return current_password
+
+    def clean(self):
+        cleaned_data = super().clean()
+        current_password = cleaned_data.get('current_password')
+        password1 = cleaned_data.get('new_password1')
+        password2 = cleaned_data.get('new_password2')
+        if password1 and password2:
+            if password1 != password2:
+                self.add_error('new_password2', 'Passwords do not match.')
+            if current_password and password1 == current_password:
+                self.add_error('new_password1', 'New password cannot be the same as the current password.')
+            password_validation.validate_password(password1, self.user)
+        return cleaned_data

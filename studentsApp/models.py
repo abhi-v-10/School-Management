@@ -11,4 +11,4 @@ class Student(models.Model):
     parent = models.ForeignKey(Parent, on_delete=models.CASCADE, null=True, blank=True, related_name='parent_contact')
 
     def __str__(self):
-        return self.user.get_full_name()
+        return self.user.username

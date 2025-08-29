@@ -1,768 +1,289 @@
-{% load static %}
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Login</title>
-
-    <!--
-      ==============================================================
-      Animated Login Page (Django-ready)
-      - Preserves original structure, styling, and GSAP animations
-      - Rewired so the Login button submits the Django form for auth
-      - Adds error/message rendering using Django messages framework
-      - Adds accessibility & progressive-enhancement touches
-      ==============================================================
-    -->
-
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Glassmorphism Login Form</title>
     <style>
-      /* ============================================================
-         Base Layout & Typography
-         ============================================================ */
-      html,
-      body {
-        padding: 0;
-        margin: 0;
-        font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Segoe UI Emoji", "Apple Color Emoji", sans-serif;
-        background-color: #FAF9F6;
-        overflow: hidden;
-      }
-
-      /* Container anchors both form and SVG animation in the center */
-      .container {
-        position: fixed;
-        top: 38%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-      }
-
-      /* The SVG and the form overlap in the same centered plane */
-      svg,
-      .form-container {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-      }
-
-      .form-container {
-        width: 270px;
-        pointer-events: auto; /* keep inputs interactive even when SVG has none */
-      }
-
-      svg {
-        width: 1000px;
-        pointer-events: none; /* animations are visual only */
-      }
-
-      /* ============================================================
-         Form Rows & Inputs
-         ============================================================ */
-      .form-container .form-row {
-        width: 100%;
-        height: 60px;
-        display: flex;
-        align-items: center;
-        justify-content: flex-start;
-      }
-
-      .form-container .form-row input[type="text"],
-      .form-container .form-row input[type="password"] {
-        width: 100%;
-        height: 30px;
-        margin: 0;
-        padding: 5px 8px;
-        outline: none;
-        border: 2px solid #dddddd;
-        background: #ffffff;
-        color: #111111;
-        border-radius: 4px;
-      }
-
-      .form-container .form-row input.valid {
-        border-color: #000000;
-      }
-
-      .form-container .form-row input[type="checkbox"] {
-        width: 20px;
-        height: 20px;
-        margin: 0 10px 0 0;
-        padding: 0;
-        border: 2px solid #dddddd;
-        border-radius: 4px;
-      }
-
-      .form-container .form-row input[type="submit"] {
-        height: 40px;
-        cursor: pointer;
-        border: none;
-        background-color: #eeeeee;
-        width: 100%;
-        border-radius: 6px;
-        transition: transform .08s ease, background-color .15s ease;
-      }
-
-      .form-container input[type="submit"]:hover {
-        background-color: #dddddd;
-      }
-
-      .form-container input[type="submit"]:active {
-        transform: translateY(1px);
-      }
-
-      .form-container label,
-      .form-container input,
-      .form-container input::placeholder {
-        font-size: 15px;
-        font-family: inherit;
-      }
-
-      /* ============================================================
-         Messages / Errors (Django messages framework)
-         ============================================================ */
-      .messages {
-        position: absolute;
-        top: -64px;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 320px;
-        max-width: calc(100vw - 32px);
-        pointer-events: auto;
-      }
-
-      .message {
-        background: #fff;
-        border: 2px solid #111;
-        border-radius: 8px;
-        padding: 10px 12px;
-        margin: 8px 0;
-        line-height: 1.3;
-        box-shadow: 2px 2px 0 #111;
-      }
-
-      .message.error { border-color: #b00020; box-shadow: 2px 2px 0 #b00020; }
-      .message.success { border-color: #0a7a2e; box-shadow: 2px 2px 0 #0a7a2e; }
-      .message.info { border-color: #0a4a7a; box-shadow: 2px 2px 0 #0a4a7a; }
-
-      /* ============================================================
-         SVG Styling (unchanged from original visual)
-         ============================================================ */
-      svg {
-        stroke-width: 1.2px;
-        stroke: #000000;
-        fill: none;
-      }
-
-      /* Progressive enhancement: when JS is disabled, we at least keep the form visible and usable */
-      noscript .fallback-note {
-        font-size: 14px;
-        color: #333;
-        margin-bottom: 16px;
-        display: block;
-        text-align: center;
-      }
+        /* Glassmorphism Login Form - Combined HTML, CSS, JS */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh; display: flex; align-items: center; justify-content: center;
+            padding: 20px; line-height: 1.6;
+        }
+        .login-container { width: 100%; max-width: 420px; perspective: 1000px; }
+        .login-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 24px;
+            padding: 40px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            position: relative; overflow: hidden;
+        }
+        .login-header { text-align: center; margin-bottom: 32px; }
+        .login-header h2 {
+            color: white; font-size: 2rem; font-weight: 700; margin-bottom: 8px;
+            background: linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .login-header p { color: rgba(255, 255, 255, 0.8); font-size: 1rem; }
+        .form-group { margin-bottom: 24px; position: relative; }
+        .input-wrapper { position: relative; display: flex; flex-direction: column; }
+        .input-wrapper input {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            padding: 16px 16px 8px 16px;
+            color: white; font-size: 16px;
+            transition: all 0.3s ease; width: 100%; outline: none;
+            backdrop-filter: blur(10px);
+        }
+        .input-wrapper label {
+            position: absolute; left: 16px; top: 16px;
+            color: rgba(255, 255, 255, 0.7); font-size: 16px; transition: all 0.3s ease;
+            pointer-events: none;
+        }
+        .input-wrapper input:focus + label,
+        .input-wrapper input.has-value + label {
+            transform: translateY(-8px) scale(0.85);
+            color: #06b6d4; font-weight: 500;
+        }
+        .error-message {
+            display: block; color: #ef4444; font-size: 12px; font-weight: 500;
+            margin-top: 6px; opacity: 0; transition: all 0.3s ease;
+        }
+        .error-message.show { opacity: 1; }
+        .btn {
+            background: linear-gradient(135deg, #6366f1 0%, #06b6d4 100%);
+            border: none; border-radius: 12px;
+            padding: 16px 24px; color: white;
+            font-size: 16px; font-weight: 600;
+            cursor: pointer; transition: all 0.3s ease;
+            position: relative; overflow: hidden; width: 100%;
+        }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(99, 102, 241, 0.6); }
+        .btn:active { transform: translateY(0); }
+        .btn-loader {
+            position: absolute; top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 20px; height: 20px;
+            border: 2px solid transparent; border-top: 2px solid white;
+            border-radius: 50%; opacity: 0;
+            animation: spin 1s linear infinite;
+        }
+        .btn.loading .btn-text { opacity: 0; }
+        .btn.loading .btn-loader { opacity: 1; }
+        @keyframes spin { 0% { transform: translate(-50%, -50%) rotate(0deg);} 100% { transform: translate(-50%, -50%) rotate(360deg);} }
+        .signup-link { text-align: center; margin-top: 20px; }
+        .signup-link p { color: rgba(255, 255, 255, 0.8); font-size: 14px; }
+        .signup-link a { color: #06b6d4; text-decoration: none; font-weight: 500; }
+        .signup-link a:hover { color: white; }
+        .success-message {
+            display: none; text-align: center;
+            padding: 40px 20px; opacity: 0;
+            transition: all 0.5s ease;
+        }
+        .success-message.show { display: block; opacity: 1; }
+        .success-icon {
+            width: 60px; height: 60px;
+            background: #22c55e; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 24px; color: white;
+            margin: 0 auto 20px;
+        }
     </style>
-  </head>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-card">
+            <div class="login-header">
+                <h2>Welcome Back</h2>
+                <p>Sign in to your account</p>
+            </div>
+            <!-- Form now posts to Django login view; CSRF token added -->
+            <form class="login-form" id="loginForm" novalidate method="post" action="{% url 'login' %}">
+                {% csrf_token %}
 
-  <body>
-    <!--
-      Accessibility live region for messages; populated by Django messages below.
-      (Screen readers will announce updates.)
-    -->
-    <div id="aria-messages" class="messages" aria-live="polite" aria-atomic="true">
-      {% if messages %}
-        {% for message in messages %}
-          <div class="message {{ message.tags|default:'' }}" role="status">{{ message }}</div>
-        {% endfor %}
-      {% endif %}
+                <!-- render django messages (e.g. invalid credentials) -->
+                {% if messages %}
+                <div style="margin-bottom:12px;">
+                    {% for message in messages %}
+                        <div class="error-message show">{{ message }}</div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <div class="form-group">
+                    <div class="input-wrapper">
+                        <input type="text" id="username" name="username" required value="{{ request.POST.username|default:'' }}">
+                        <label for="username">Username</label>
+                    </div>
+                    <span class="error-message" id="usernameError"></span>
+                </div>
+                <div class="form-group">
+                    <div class="input-wrapper password-wrapper" style="position:relative;">
+                        <input type="password" id="password" name="password" required>
+                        <label for="password">Password</label>
+                        <!-- toggle button added; minimal inline style so visual layout remains unchanged -->
+                        <button type="button" id="togglePassword" aria-label="Toggle password visibility" style="position:absolute; right:12px; top:50%; transform:translateY(-50%); background:transparent; border:none; color:white; cursor:pointer; font-size:18px;">&#128065;</button>
+                    </div>
+                    <span class="error-message" id="passwordError"></span>
+                </div>
+                <button type="submit" class="login-btn btn">
+                    <span class="btn-text">Sign In</span>
+                    <span class="btn-loader"></span>
+                </button>
+            </form>
+            <div class="signup-link">
+                <p>Don't have an account? <a href="{% url 'home' %}">Sign up</a></p>
+            </div>
+            <div class="success-message" id="successMessage">
+                <div class="success-icon">✓</div>
+                <h3>Login Successful!</h3>
+                <p>Redirecting to your dashboard...</p>
+            </div>
+        </div>
     </div>
-
-    <div class="container" id="root-container">
-      <div class="form-container" id="form-layer">
-        <form id="loginForm" method="post" action="" novalidate>
-          {% csrf_token %}
-
-          <label class="form-row" for="username"> <input autocomplete="username" type="text" id="username" name="username" placeholder="Username" required aria-label="Username" inputmode="text"/></label>
-          <label class="form-row" for="password"> <input autocomplete="current-password" type="password" id="password" name="password" placeholder="Password" required aria-label="Password"/></label>
-          <div class="form-row">
-            <input id="submitBtn" type="submit" value="Login" aria-label="Login" />
-          </div>
-
-          <!-- Optional: next parameter handling (uncomment if you pass ?next=/path/)
-          {% if request.GET.next %}
-            <input type="hidden" name="next" value="{{ request.GET.next }}" />
-          {% endif %}
-          -->
-        </form>
-
-        <!-- No-JS fallback note (kept minimal). The form still posts without JS. -->
-        <noscript>
-          <span class="fallback-note">JavaScript is disabled. Animations are off, but login still works.</span>
-        </noscript>
-      </div>
-      <svg viewBox="0 0 1000 1000" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
-        <rect x="710" y="527" width="16" height="47" rx="10" ry="10"></rect>
-        <g class="grabbing-hand">
-          <path d="M48.89,54.39c-3.51.76-15.72,3-22.83-.68a14,14,0,0,0-6.41-1.52h0A3.79,3.79,0,0,1,17,51.09a3.7,3.7,0,0,1-1.1-2.64V27.75A3.75,3.75,0,0,1,19.63,24H24.1"/>
-          <path class="grabbing-hand-finger-open" d="M57.05,29.76l24.82,0a4.07,4.07,0,0,0,4.11-4h0a4.07,4.07,0,0,0-4-4.11L48.69,21.3"/>
-          <path class="grabbing-hand-finger-open" d="M59.34,37.74l28.81.61a4.06,4.06,0,0,0,4.14-4h0a4.06,4.06,0,0,0-4-4.15L57,29.64"/>
-          <path class="grabbing-hand-finger-open" d="M57.13,45.9l26.94.78a4.07,4.07,0,0,0,4.15-4h0a4.07,4.07,0,0,0-4-4.14l-24.84-.8"/>
-          <path class="grabbing-hand-finger-open" d="M48.89,54.39l27.82.36a4.06,4.06,0,0,0,4.2-3.93h0A4.06,4.06,0,0,0,77,46.62l-19.88-.78" />
-          <path class="grabbing-hand-finger-open" d="M40.78,28c5.75-5.85,12.66-22,10.5-25.88-2.25-4.09-6,.1-14.73,8.66C30.84,16.36,30.91,17.1,24.32,24"/>
-        </g>
-
-        <g class="pull-system">
-          <line class="checkbox-pull-line" x1="0" y1="0" x2="0" y2="0" />
-          <g class="checkbox-pull-circle"> <circle cx="0" cy="0" r="10" /> <circle cx="0" cy="0" r="4" fill="#000000" /></g>
-          <circle class="submit-btn-circle" cx="0" cy="0" r="3" stroke="none" fill="#000"/>
-          <path class="submit-btn-connector" d=""></path>
-        </g>
-
-        <g class="spray-hand-container">
-          <g class="pushing-hand"><circle cx="18" cy="0" r="5" fill="#000000" /><circle cx="18" cy="-70" r="5" fill="#000000" /><path d="M18,-70 v70" stroke-width="4" /><g>
-              <path d="M25.3,32.9V60.2a4.2,4.2,0,0,0,4.2,4.2h0a4.2,4.2,0,0,0,4.2-4.2V26.7"/>
-              <rect x="3.9" y="18.4" width="8.4" height="21.47" rx="3.7" transform="translate(10.2 -1) rotate(19.4)"/>
-              <path d="M20.9,24a3.4,3.4,0,0,0-1.7-1.1h0a4.2,4.2,0,0,0-5.4,2.5L9.1,38.8a4.3,4.3,0,0,0,2.6,5.4h0a4.3,4.3,0,0,0,5.4-2.6l1.8-5.1"/>
-              <path d="M18.4,37.9,17.3,43a4.2,4.2,0,0,0,3.4,4.9h0a4.3,4.3,0,0,0,4.5-2.3"/>
-              <path fill="white" d="M29,16.8c-6.4,5-15,13.2-12.8,17.8s6,.7,15.8-6.7c6.4-4.8,7.4-12.6.5-19.2V4.2A3.8,3.8,0,0,0,28.7.5H8A3.5,3.5,0,0,0,5.4,1.6,3.7,3.7,0,0,0,4.3,4.2V8.7"/>
-              <path d="M4.3,8.7c-5.8,6.4-3.6,20-2.2,24.8" />
-            </g>
-          </g>
-          <g class="sprayer">
-            <g class="sprayer-head">
-              <defs>
-                <radialGradient id="grad1" cx="50%" cy="50%" r="50%" fx="100%" fy="50%">
-                  <stop offset="0%" stop-color="#777777" stop-opacity="0" />
-                  <stop offset="100%" stop-color="#777777" stop-opacity="1" />
-                </radialGradient>
-              </defs>
-              <rect x="82.39" y="19.85" width="13.06" height="16.79" rx="1.46"/>
-              <rect x="74.55" y="22.56" width="7.84" height="6.1" rx="1.13" />
-
-              <line class="spray-line" stroke="#777777" stroke-dasharray="8 5" x1="22.4" y1="14.76" x2="74.27" y2="25.2"/>
-              <line class="spray-line" stroke="#777777" stroke-dasharray="8 5" x1="21.51" y1="21.12" x2="74.27" y2="25.2"/>
-              <line class="spray-line" stroke="#777777" stroke-dasharray="8 5" x1="21.44" y1="28.26" x2="74.27" y2="25.2"/>
-              <line class="spray-line" stroke="#777777" stroke-dasharray="8 5" x1="22.37" y1="35.54" x2="74.27" y2="25.2"/>
-              <line class="spray-line" stroke="#777777" stroke-dasharray="8 5" x1="24.21" y1="42.36" x2="74.27" y2="25.2"/>
-              <line class="spray-line" stroke="#777777" stroke-dasharray="8 5" x1="24.31" y1="7.78" x2="74.27" y2="25.2"/>
-
-              <circle fill="url(#grad1)" stroke="none" class="spray-bubble" cx="25.43" cy="12.97" r="12.47"/>
-              <circle fill="url(#grad1)" stroke="none" class="spray-bubble" cx="15.6" cy="25.43" r="15.1"/>
-              <circle fill="url(#grad1)" stroke="none" class="spray-bubble" cx="33.24" cy="37.13" r="9.21"/>
-              <circle fill="url(#grad1)" stroke="none" class="spray-bubble" cx="35.92" cy="19.5" r="11.89"/>
-              <circle fill="url(#grad1)" stroke="none" class="spray-bubble" cx="18.82" cy="34.45" r="11.89"/>
-            </g>
-            <path d="M89,42h0a21.3,21.3,0,0,1,21.3,21.3v56.48a5.06,5.06,0,0,1-5.06,5.06H72.6a5.06,5.06,0,0,1-5.06-5.06V63.4A21.45,21.45,0,0,1,89,42Z" fill="#fff"/>
-            <rect x="78.3" y="36.64" width="21.24" height="6.15" rx="1.93" fill="#fff"/>
-            <rect x="76.33" y="71.46" width="33.96" height="23.23" fill="#cccccc"/>
-          </g>
-        </g>
-
-        <g>
-          <line class="gear-connector" x1="0" x2="0" y1="0" y2="0" />
-          <g class="gears"></g>
-        </g>
-
-        <g class="grabbing-hand">
-          <g fill="#ffffff">
-            <rect class="grabbing-hand-finger-closed" x="44.79" y="13.38" width="8.42" height="22.15" rx="3.67" transform="translate(20.57 71.26) rotate(-85.25)"/>
-            <rect class="grabbing-hand-finger-closed" x="44.08" y="39.17" width="8.42" height="21.47" rx="3.67" transform="translate(-5.44 93.9) rotate(-85.25)"/>
-            <rect class="grabbing-hand-finger-closed" x="45.68" y="30.71" width="8.42" height="22.57" rx="3.67" transform="matrix(0.08, -1, 1, 0.08, 3.91, 88.24)"/>
-            <rect class="grabbing-hand-finger-closed" x="44.98" y="22.21" width="8.42" height="22.57" rx="3.67" transform="matrix(0.08, -1, 1, 0.08, 11.74, 79.74)"/>
-            <path class="grabbing-hand-finger-closed" d="M32.18,27.42c5,6.46,13.22,15.06,17.76,12.81,4.18-2.07.69-6-6.66-15.74C38.46,18.1,30.69,17.1,24.1,24"/>
-          </g>
-        </g>
-
-        <g class="spiral-container">
-          <path stroke-width=".8" class="spiral-path" d="" />
-        </g>
-
-        <g class="weight-big-container">
-          <line x1="14" x2="60" y1="14" y2="14"></line>
-          <line x1="14" x2="60" y1="14" y2="55"></line>
-          <circle cx="14" cy="14" r="5" fill="#000000" stroke="none" />
-
-          <g class="weight-big" stroke="none">
-            <path d="M25.5,16.7c.2-.6.5-1.3.7-2C31.1,3.1,23.2,0,14.3,0S-1.6,4.2,2.4,14.7a22.5,22.5,0,0,1,.8,2.4A14.4,14.4,0,0,0,0,26.2c0,8,6.5,11.6,14.5,11.6S29,34.2,29,26.2A14.6,14.6,0,0,0,25.5,16.7ZM14.4,5c5.6,0,9.3,1.9,7.1,8.5a13.5,13.5,0,0,0-7-1.8,14.6,14.6,0,0,0-7.2,1.9C5.5,7.5,8.8,5,14.4,5Z" fill="#231f20"/>
-            <path d="M15.1,15.6l-1.8-.2a9.2,9.2,0,0,0-9.1,9.2,6.2,6.2,0,0,0,.2,1.9A13.3,13.3,0,0,1,15.1,15.6Z" fill="#fff"/>
-          </g>
-        </g>
-        <g class="scales-container">
-          <defs>
-            <marker id="ball" viewBox="0 0 10 10" refX="5" refY="5" markerUnits="strokeWidth" markerWidth="5" markerHeight="5" orient="auto">
-              <circle cx="5" cy="5" r="3" fill="#000" />
-            </marker>
-          </defs>
-
-          <rect x="10" y="-19" width="30" height="90" rx="15" ry="15" stroke-width="10" stroke="#ccc"/>
-          <rect class="timing-chain" x="10" y="-19" width="30" height="90" rx="15" ry="15" stroke="#fff"/>
-          <rect x="-31" y="-19" width="30" height="144" rx="15" ry="15" stroke-width="10" stroke="#ccc"/>
-          <rect class="timing-chain" x="-31" y="-19" width="30" height="144" rx="15" ry="15" stroke="#fff"/>
-
-          <g class="reels-connector">
-            <rect x="-8" y="3.2" width="25" height="10" rx="5" ry="5" />
-            <circle cx="-1" cy="8.5" r="3" fill="#000" stroke="none" />
-            <circle cx="9.9" cy="8.5" r="3" fill="#000" stroke="none" />
-          </g>
-
-          <g class="car-weight-connector">
-            <rect x="-36" y="97" width="10" height="95" rx="5" ry="5" />
-            <circle cx="-31" cy="103" r="3" fill="#000" stroke="none" />
-            <circle cx="-31" cy="186" r="3" fill="#000" stroke="none" />
-          </g>
-
-          <line class="scales-moving-line" x1="147.6" y1="30.52" x2="40" y2="12" stroke-width="2" marker-start="url(#ball)" marker-end="url(#ball)"
-          />
-          <path fill="#000000" d="M102.45,30.68,92,20.26c-9.89,9.9-9.89,10.47-9.89,10.47Z"
-          />
-        </g>
-
-        <g class="car-container">
-          <g>
-            <g class="car"> <circle cx="17" cy="88" r="5" /> <circle cx="17" cy="88" r="2" fill="#000" /> <circle cx="32" cy="88" r="5" /> <circle cx="32" cy="88" r="2" fill="#000" />
-              <path d="M10,65 h30 l-5,15 h-20 l-5,-15 " fill="#000" />
-            </g>
-
-            <line x1="-51" y1="95" x2="145" y2="95" />
-          </g>
-        </g>
-      </svg>
-    </div>
-
-    <!-- GSAP -->
-    <script src="https://unpkg.com/gsap@3/dist/gsap.min.js"></script>
 
     <script>
-
-      const containerEl = document.querySelector('.container');
-      const formEl = document.getElementById('loginForm');
-      const usernameEl = document.querySelector('.form-container .form-row input[name="username"]');
-      const passwordEl = document.querySelector('.form-container .form-row input[name="password"]');
-      const submitBtn = document.getElementById('submitBtn');
-
-      const sprayer = document.querySelector('.sprayer');
-      const sprayHandContainer = document.querySelector('.spray-hand-container');
-      const sprayLines = Array.from(document.querySelectorAll('.spray-line'));
-      const sprayBubbles = Array.from(document.querySelectorAll('.spray-bubble'));
-
-      const pushingHand = document.querySelector('.pushing-hand');
-      const sprayerHead = document.querySelector('.sprayer-head');
-      const gearsContainer = document.querySelector('svg .gears');
-      const gearConnector = document.querySelector('.gear-connector');
-
-      const pullSystemContainer = document.querySelector('.pull-system');
-
-      const checkboxPullLine = document.querySelector('.checkbox-pull-line');
-      const checkboxPullCircle = document.querySelector('.checkbox-pull-circle');
-      const btnPullLine = document.querySelector('.submit-btn-connector');
-      const btnHandlerCircle = document.querySelector('.submit-btn-circle');
-
-      const spiralContainer = document.querySelector('.spiral-container');
-      const weightBigContainer = document.querySelector('.weight-big-container');
-
-      const scalesContainer = document.querySelector('.scales-container');
-      const scalesLine = document.querySelector('.scales-moving-line');
-      const weightBig = document.querySelector('.weight-big');
-      const spiralPath = document.querySelector('.spiral-path');
-
-      const carContainer = document.querySelector('.car-container');
-      const car = document.querySelector('.car');
-      const carInclineWrapper = document.querySelector('.car-container g');
-      const timingChains = Array.from(document.querySelectorAll('.timing-chain'));
-      const reelsConnector = document.querySelector('.reels-connector');
-      const carWeightConnector = document.querySelector('.car-weight-connector');
-
-      const grabbingHand = document.querySelectorAll('.grabbing-hand');
-      const grabbingHandOpenFingers = Array.from(document.querySelectorAll('.grabbing-hand-finger-open'));
-      const grabbingHandClosedFingers = Array.from(document.querySelectorAll('.grabbing-hand-finger-closed'));
-
-      layoutPreparation();
-      scaleToFit();
-      window.onresize = scaleToFit;
-
-      function scaleToFit() {
-        const h = 800;
-        if (window.innerHeight < h) {
-          gsap.set(containerEl, {
-            scale: window.innerHeight / h,
-            transformOrigin: "50% 75%"
-          })
-        } else {
-          gsap.set(containerEl, { scale: 1 });
-        }
-      }
-
-      let sprayRepeatCounter = 0;
-      const state = {
-        handClosed: false,
-        sumbitBtnOnPlace: false,
-        sumbitBtnTextOpacity: 0,
-        pullProgress: 0,
-      };
-
-      let usernameValid = false;
-      let passwordValid = false;
-      let buttonPulled = false;
-
-      const passwordTl = createPasswordTl();
-      const gearsTls = createGearsTimelines();
-      createPullingTimeline(state.handClosed, buttonPulled);
-
-      // Input validation triggers gears and visuals (same behavior)
-      usernameEl.addEventListener('input', () => {
-        usernameValid = usernameEl.value.trim().length > 3;
-        if (usernameValid) {
-          usernameEl.classList.add("valid");
-          gearsTls.forEach(tl => {
-            if (tl.paused()) {
-              tl.play();
-              gsap.fromTo(tl, { timeScale: 0 }, { timeScale: 1 });
+        class SimpleLoginForm {
+            constructor() {
+                this.form = document.getElementById('loginForm');
+                this.submitBtn = this.form.querySelector('.login-btn');
+                this.successMessage = document.getElementById('successMessage');
+                this.isSubmitting = false;
+                this.toggleBtn = document.getElementById('togglePassword');
+                this.passwordField = document.getElementById('password');
+                this.validators = {
+                    username: (value) => {
+                        if (!value) return { isValid: false, message: 'Username is required' };
+                        if (value.length < 3) return { isValid: false, message: 'Username must be at least 3 characters' };
+                        return { isValid: true };
+                    },
+                    password: (value) => {
+                        if (!value) return { isValid: false, message: 'Password is required' };
+                        if (value.length < 8) return { isValid: false, message: 'Password must be at least 8 characters' };
+                        return { isValid: true };
+                    }
+                };
+                this.init();
             }
-          });
-        } else {
-          usernameEl.classList.remove("valid");
-          gearsTls.forEach(tl => {
-            if (!tl.paused()) {
-              gsap.to(tl, { timeScale: 0, onComplete: () => tl.pause() });
-            }
-          });
-          sprayRepeatCounter = 0;
-          gsap.to(submitBtn, { duration: .3, color: "rgba(0, 0, 0, 0)" });
-          if (buttonPulled) {
-            buttonPulled = false;
-            createPullingTimeline(state.handClosed, buttonPulled);
-          }
-        }
-      });
-
-      passwordEl.addEventListener('input', () => {
-        // basic password validity (>5 chars) – adjust as needed
-        passwordValid = passwordEl.value.length >= 6;
-        if (passwordValid) {
-          passwordEl.classList.add("valid");
-          passwordTl.play();
-        } else {
-          passwordEl.classList.remove("valid");
-          passwordTl.reverse();
-          if (buttonPulled) {
-            buttonPulled = false;
-            createPullingTimeline(state.handClosed, buttonPulled);
-          }
-        }
-      });
-
-      // Submit behavior:
-      //  - If requirements met (username, password, remember pulled & spray looped): run quick exit animation then submit
-      //  - Otherwise, prevent submit and nudge inputs visually
-      submitBtn.addEventListener('click', (e) => {
-        const ready = passwordValid && buttonPulled && usernameValid && sprayRepeatCounter > 1;
-        if (!ready) {
-          e.preventDefault();
-          // tiny feedback shake if not ready
-          gsap.fromTo('#form-layer', { x: 0 }, { x: 6, yoyo: true, repeat: 5, duration: 0.05, ease: 'power1.inOut' });
-          return;
-        }
-
-        // Allow the form to submit, but play the vanish animation first
-        e.preventDefault();
-        gsap.to("svg > *", {
-          duration: .1,
-          opacity: 0,
-          stagger: { each: 0.03, from: 'random', ease: 'none' }
-        });
-        gsap.to(".form-row", { delay: .25, duration: .1, opacity: 0, stagger: .08 });
-
-        // Submit to Django view shortly after the fade (keeps the original wow-moment)
-        setTimeout(() => {
-          try {
-            formEl.submit(); // hits your login_user view (POST)
-          } catch (err) {
-            // fallback if submit fails for some reason
-            formEl.requestSubmit ? formEl.requestSubmit() : formEl.submit();
-          }
-        }, 400);
-      });
-
-      // Also allow Enter key to submit when focused in inputs
-      formEl.addEventListener('keydown', (ev) => {
-        if (ev.key === 'Enter') {
-          if (!buttonPulled && usernameValid && passwordValid) {
-            buttonPulled = true;
-            createPullingTimeline(state.handClosed, buttonPulled);
-            ev.preventDefault();
-          } else {
-            submitBtn.click();
-            ev.preventDefault();
-          }
-        }
-      });
-
-      function layoutPreparation() {
-        gsap.set(pullSystemContainer, { x: 375, y: 646 });
-        gsap.set(sprayHandContainer, { x: 700, y: 621 });
-        gsap.set(sprayer, { x: -59.5, y: 53 });
-        gsap.set(carContainer, { x: 190, y: 802 });
-        gsap.set(scalesContainer, { x: 170, y: 710 });
-        gsap.set(grabbingHand, { x: 297, y: 830 });
-        gsap.set(grabbingHandClosedFingers, { opacity: 0 });
-        gsap.set(spiralContainer, { x: 305, y: 435, svgOrigin: "14 14", scaleX: -1 });
-        gsap.set(weightBigContainer, { x: 305, y: 435 });
-        gsap.set(submitBtn, { color: "rgba(0, 0, 0, 0)" });
-        gsap.set([sprayLines, sprayBubbles], { opacity: 0 });
-        gsap.set(timingChains[0], { attr: { "stroke-width": "5", "stroke-dasharray": "0 12" } });
-        gsap.set(timingChains[1], { attr: { "stroke-width": "5", "stroke-dasharray": "0 12" } });
-        gsap.set(checkboxPullLine, { attr: { y1: -105, y2: 44 } });
-        gsap.set(checkboxPullCircle, { y: 44 });
-        gsap.set(submitBtn, { transformOrigin: "100% 0%", rotation: -90 });
-      }
-
-      function updateSpiralPath(centerX, centerY, radius, coils, points, offset) {
-        let path = "";
-        let thetaMax = coils * 2 * Math.PI;
-        const awayStep = radius / thetaMax;
-        const chord = 2 * Math.PI / points;
-        thetaMax -= offset * points * chord;
-
-        for (let theta = 0; theta <= thetaMax; theta += chord) {
-          const away = awayStep * theta;
-          const x = centerX + Math.cos(theta) * away;
-          const y = centerY + Math.sin(theta) * away;
-
-          if (theta === 0) {
-            path += `M${x},${y}`;
-          } else {
-            const prevAway = awayStep * (theta - chord);
-            const arcRadius = (away + prevAway) / 2;
-            path += ` A${arcRadius},${arcRadius} 0 0,1 ${x},${y}`;
-          }
-        }
-
-        const outerAngle = thetaMax + .5 * Math.PI;
-        const outerLength = 50 + 25 * offset;
-        const endPoint = [
-          Math.cos(outerAngle) * outerLength,
-          Math.sin(outerAngle) * outerLength,
-        ];
-        path += (' l' + endPoint[0] + ',' + endPoint[1]);
-
-        gsap.set(spiralPath, { attr: { d: path } });
-        gsap.set(weightBig, { x: -47 + 3 * offset, y: 12 + outerLength });
-      }
-
-      function createPasswordTl() {
-        const spiralTurnsNumber = 8;
-        const spiralProgress = { v: 0 };
-        const hammerTimeStart = 1.85;
-        const fingersDelay = .5;
-        const fingersTimeDelta = .03;
-        const tl = gsap.timeline({
-          paused: true,
-          defaults: { ease: "none", duration: 2 },
-          onUpdate: () => {
-            updateSpiralPath(14, 14, 45, 17, 200, spiralTurnsNumber * spiralProgress.v);
-          },
-        })
-        .to(spiralProgress, { v: 1 }, 0)
-        .to(spiralContainer, { rotation: -spiralTurnsNumber * 360 }, 0)
-        .fromTo(scalesLine, { rotation: -20, svgOrigin: "92 20" }, { duration: .15, rotation: -1, svgOrigin: "92 20" }, hammerTimeStart)
-        .fromTo(timingChains[0], { attr: { "stroke-dashoffset": 2 } }, { duration: .15, attr: { "stroke-dashoffset": 20 } }, hammerTimeStart)
-        .fromTo(timingChains[1], { attr: { "stroke-dashoffset": 24 } }, { duration: .15, attr: { "stroke-dashoffset": 6 } }, hammerTimeStart)
-        .to(reelsConnector, { duration: .15, y: 18 }, hammerTimeStart)
-        .to(carWeightConnector, { duration: .15, y: -18 }, hammerTimeStart)
-        .to(carInclineWrapper, { duration: .15, rotation: 6, svgOrigin: "120 93" }, hammerTimeStart)
-        .fromTo(car, { x: -50 }, { duration: .6, x: 95, ease: "power2.in" }, hammerTimeStart);
-
-        for (let i = 0; i < 5; i++) {
-          tl
-            .set(grabbingHandOpenFingers[i], { opacity: 0 }, hammerTimeStart + fingersDelay + fingersTimeDelta * (i + 1))
-            .set(grabbingHandClosedFingers[i], { opacity: 1 }, hammerTimeStart + fingersDelay + fingersTimeDelta * (i + 1));
-        }
-        tl
-          .fromTo(state, { handClosed: false }, { duration: .01, handClosed: true }, ">")
-          .to(grabbingHand, { duration: fingersTimeDelta * 5, x: "+=20" }, hammerTimeStart + fingersDelay);
-
-        tl.progress(0.001);
-        return tl;
-      }
-
-      function createGearsTimelines() {
-        const tls = [];
-        const params = { baseSize: 15, pitch: 11, teethCurve: .6, startPos: {x: 634, y: 389}, speed: .2 };
-        const data = [
-          { angle: 0,   teethNumber: 10, hasHole: true },
-          { angle: -.5, teethNumber: 32, hasHole: true },
-          { angle: 1.65, teethNumber: 12, hasHole: false }
-        ];
-
-        const handleRadius = 14;
-        const gears = [];
-
-        data.forEach((d, dIdx) => {
-          const radius = (d.teethNumber * params.baseSize) / (2 * Math.PI);
-          let x, y, startAngle;
-          if (dIdx === 0) {
-            startAngle = 0; x = params.startPos.x; y = params.startPos.y;
-          } else {
-            const parent = gears[dIdx - 1];
-            const size = parent.teethNumber / d.teethNumber;
-            x = parent.center.x + Math.cos(d.angle) * (parent.radius + radius);
-            y = parent.center.y + Math.sin(d.angle) * (parent.radius + radius);
-            startAngle = (1 + size) * d.angle - size * parent.angle;
-          }
-
-          const group = document.createElementNS("http://www.w3.org/2000/svg", "g");
-          const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-          gearsContainer.appendChild(group);
-          group.appendChild(path);
-
-          const gear = {
-            idx: dIdx,
-            center: {x, y},
-            radius,
-            angle: startAngle,
-            teethNumber: d.teethNumber,
-            hasHole: d.hasHole,
-            toothAngle: 2 * Math.PI / d.teethNumber,
-            toothCurveAngle: params.teethCurve / d.teethNumber,
-            group
-          };
-
-          const rOut = gear.radius + .25 * params.pitch;
-          const rIn = rOut - .75 * params.pitch;
-          let pathD = "M" + (gear.center.x + Math.cos(gear.angle - gear.toothAngle + gear.toothCurveAngle) * rOut) + ", " + (gear.center.y + Math.sin(gear.angle - gear.toothAngle + gear.toothCurveAngle) * rOut) + " ";
-          for (let a = gear.angle; a < (gear.angle + 2 * Math.PI - .5 * gear.toothAngle); a += gear.toothAngle) {
-            const pa = (a - .5 * gear.toothAngle);
-            pathD += ("L" + (gear.center.x + Math.cos(pa - gear.toothCurveAngle) * rOut) + ", " + (gear.center.y + Math.sin(pa - gear.toothCurveAngle) * rOut) + " ");
-            pathD += ("L" + (gear.center.x + Math.cos(pa) * rIn) + ", " + (gear.center.y + Math.sin(pa) * rIn) + " ");
-            pathD += ("L" + (gear.center.x + Math.cos(a) * rIn) + ", " + (gear.center.y + Math.sin(a) * rIn) + " ");
-            pathD += ("L" + (gear.center.x + Math.cos(a + gear.toothCurveAngle) * rOut) + ", " + (gear.center.y + Math.sin(a + gear.toothCurveAngle) * rOut) + " ");
-          }
-
-          if (gear.hasHole) {
-            const holeRadius = .5 * rIn;
-            pathD += ("M" + (gear.center.x - holeRadius) + ", " + (gear.center.y) + " ");
-            pathD += `A ${holeRadius} ${holeRadius} 1 1 0 ${gear.center.x + holeRadius} ${gear.center.y}`;
-            pathD += `A ${holeRadius} ${holeRadius} 1 1 0 ${gear.center.x - holeRadius} ${gear.center.y}`;
-          }
-
-          if (dIdx === 0) {
-            const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-            gsap.set(circle, { attr: { cx: gear.center.x, cy: gear.center.y, r: 5, fill: "#000000" }});
-            gearsContainer.appendChild(circle);
-            gsap.set(path, { attr: { fill: "#000000", "fill-opacity": .25 } });
-          } else if (dIdx === (data.length - 1)) {
-            gsap.set(path, { attr: { fill: "#000000", "fill-opacity": .25 } });
-            const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-            gsap.set(circle, { attr: { cx: gear.center.x + handleRadius, cy: gear.center.y, r: 5, fill: "#000000" } });
-            gear.group.appendChild(circle);
-          }
-
-          path.setAttribute("d", pathD);
-
-          const tl = gsap.timeline({ repeat: -1, paused: true })
-            .to(group, { duration: params.speed * gear.teethNumber, rotation: 360 * (gear.idx % 2 ? -1 : 1), svgOrigin: gear.center.x + " " + gear.center.y, ease: "none" });
-
-          if (dIdx === (data.length - 1)) {
-            tl.eventCallback("onUpdate", () => {
-              const angle = tl.progress() * 2 * Math.PI;
-              const deltaY = Math.sin(angle) * handleRadius;
-              gsap.set(pushingHand, { y: deltaY });
-              if (deltaY > 8) {
-                const d = Math.max(0, deltaY - 8);
-                gsap.set(sprayerHead, { y: d });
-
-                let sprayProgress = Math.max(0, tl.progress() - .1);
-                sprayProgress *= (1 / .2);
-
-                let bubblesOpacity = (sprayProgress > 1) ? 0 : sprayProgress;
-                bubblesOpacity *= (1 - Math.pow(bubblesOpacity, 8));
-
-                const textProgress = Math.pow(sprayProgress / 1.5, 6);
-
-                if (!state.sumbitBtnOnPlace) {
-                  state.sumbitBtnTextOpacity = (sprayRepeatCounter - 1) * .3 + .3 * textProgress;
-                  state.sumbitBtnTextOpacity = Math.pow(state.sumbitBtnTextOpacity, 2);
-                }
-
-                gsap.set(submitBtn, { color: "rgba(0, 0, 0, " + state.sumbitBtnTextOpacity + ")" });
-                gsap.set(sprayLines, { attr: { "stroke-dashoffset": 70 * sprayProgress }, opacity: Math.pow(bubblesOpacity, 2) });
-                sprayBubbles.forEach((b, bIdx) => {
-                  gsap.set(b, { x: 25 * (1 - sprayProgress) * (1 + .1 * bIdx), scale: .5 + 1.4 * Math.pow(sprayProgress, 2), transformOrigin: "center center", opacity: bubblesOpacity });
+            init() {
+                this.form.addEventListener('submit', (e) => this.handleSubmit(e));
+                Object.keys(this.validators).forEach(name => {
+                    const field = document.getElementById(name);
+                    field.addEventListener('input', () => this.clearError(name));
+                    // add has-value class to keep label floated when input has value
+                    field.addEventListener('blur', () => {
+                        if (field.value.trim()) field.classList.add('has-value'); else field.classList.remove('has-value');
+                    });
                 });
-              }
 
-              gsap.set(gearConnector, { attr: { x1: gear.center.x + handleRadius * Math.cos(angle), y1: gear.center.y + handleRadius * Math.sin(angle), x2: 700 + 18, y2: 646 - 100 + deltaY } });
-            });
+                // password toggle
+                if (this.toggleBtn && this.passwordField) {
+                    this.toggleBtn.addEventListener('click', () => {
+                        if (this.passwordField.type === 'password') {
+                            this.passwordField.type = 'text';
+                            this.toggleBtn.innerHTML = '&#128584;'; // change icon
+                        } else {
+                            this.passwordField.type = 'password';
+                            this.toggleBtn.innerHTML = '&#128065;';
+                        }
+                    });
+                }
+            }
+            validateField(name) {
+                const field = document.getElementById(name);
+                const result = this.validators[name](field.value.trim());
+                if (!result.isValid) {
+                    this.showError(name, result.message);
+                }
+                return result.isValid;
+            }
+            showError(name, message) {
+                const error = document.getElementById(name + 'Error');
+                error.textContent = message;
+                error.classList.add('show');
+            }
+            clearError(name) {
+                const error = document.getElementById(name + 'Error');
+                error.textContent = '';
+                error.classList.remove('show');
+            }
+            async handleSubmit(e) {
+                e.preventDefault();
+                if (this.isSubmitting) return;
+                let valid = true;
+                Object.keys(this.validators).forEach(name => {
+                    if (!this.validateField(name)) valid = false;
+                });
+                if (!valid) return;
 
-            tl.eventCallback("onRepeat", () => {
-              if (!state.sumbitBtnOnPlace) {
-                sprayRepeatCounter++;
-              }
-            });
-          }
+                // show loading state then submit the form via AJAX so we can show the success animation
+                this.isSubmitting = true;
+                this.submitBtn.classList.add('loading');
 
-          tl.progress(0.6);
-          tls.push(tl);
-          gears.push(gear);
-        });
+                // collect CSRF token and form data
+                const csrfInput = document.querySelector('input[name="csrfmiddlewaretoken"]');
+                const csrfToken = csrfInput ? csrfInput.value : '';
+                const formData = new FormData(this.form);
 
-        return tls;
-      }
+                try {
+                    const response = await fetch(this.form.action, {
+                        method: 'POST',
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'X-CSRFToken': csrfToken
+                        },
+                        body: formData
+                    });
 
-      function createPullingTimeline(isFixed, BtnPulled) {
-        let tl = gsap.timeline({ defaults: { ease: "power1.inOut", duration: 1 }, onUpdate: animatePullingLine });
+                    if (!response.ok) {
+                        // try to read JSON error details
+                        let errData = {};
+                        try { errData = await response.json(); } catch (e) { /* ignore */ }
+                        const messages = errData.errors || ['Login failed. Please try again.'];
+                        // show first message in password error slot
+                        this.showServerError(messages[0]);
+                        this.submitBtn.classList.remove('loading');
+                        this.isSubmitting = false;
+                        return;
+                    }
 
-        if (isFixed && BtnPulled) {
-          tl.to(state, { pullProgress: 1 }, 0)
-            .to(submitBtn, { rotation: 0 }, 0)
-            .to(state, { duration: .1, sumbitBtnOnPlace: 1 }, .9)
-            .to(checkboxPullLine, { attr: { y2: 44 - 130 } }, 0)
-            .to(checkboxPullCircle, { y: 44 - 130 }, 0);
-        } else if (!isFixed && BtnPulled) {
-          tl.to(state, { pullProgress: 1 }, 0)
-            .to(checkboxPullLine, { attr: { y2: 44 - 130 } }, 0)
-            .to(checkboxPullCircle, { y: 44 - 130 }, 0);
-        } else if (isFixed && !BtnPulled) {
-          tl.to(state, { pullProgress: 0 }, 0)
-            .to(submitBtn, { rotation: -90 }, 0)
-            .to(state, { duration: .1, sumbitBtnOnPlace: 0 }, 0)
-            .to(checkboxPullLine, { attr: { y2: 44 } }, 0)
-            .to(checkboxPullCircle, { y: 44 }, 0);
-        } else if (!isFixed && !BtnPulled) {
-          tl.to(state, { pullProgress: 0 }, 0)
-            .to(checkboxPullLine, { attr: { y2: 44 } }, 0)
-            .to(checkboxPullCircle, { y: 44 }, 0);
+                    const data = await response.json();
+                    if (data.success) {
+                        // show success UI then redirect after 2.5 seconds
+                        this.form.style.display = 'none';
+                        this.successMessage.classList.add('show');
+                        this.submitBtn.classList.remove('loading');
+                        setTimeout(() => {
+                            window.location.href = data.redirect_url || '/';
+                        }, 2500);
+                    } else {
+                        const messages = data.errors || ['Login failed.'];
+                        this.showServerError(messages[0]);
+                        this.submitBtn.classList.remove('loading');
+                        this.isSubmitting = false;
+                    }
+                } catch (err) {
+                    this.showServerError('An unexpected error occurred.');
+                    this.submitBtn.classList.remove('loading');
+                    this.isSubmitting = false;
+                }
+            }
+
+            // helper to show server-side errors in the form
+            showServerError(message) {
+                const pwError = document.getElementById('passwordError');
+                pwError.textContent = message;
+                pwError.classList.add('show');
+            }
         }
-
-        function animatePullingLine() {
-          const buttonOriginPoint = [260, -76];
-          const btnWidth = 270;
-          const deg = (gsap.getProperty(submitBtn, "rotation") - 4) * Math.PI / 180;
-          const btnEnd = [
-            buttonOriginPoint[0] - (btnWidth - 20) * Math.cos(deg),
-            buttonOriginPoint[1] - (btnWidth - 20) * Math.sin(deg),
-          ];
-          gsap.set(btnHandlerCircle, { attr: { cx: btnEnd[0], cy: btnEnd[1] } });
-
-          const handle = 7;
-          const r = 10;
-
-          let btnPullLinePath = "M" + (-r - handle) + "," + (250 - (isFixed ? 0 : state.pullProgress * 300));
-          btnPullLinePath += "h" + (2 * handle);
-          btnPullLinePath += "h" + (-handle);
-          btnPullLinePath += " V" + (44 - state.pullProgress * 130);
-          const slideAngle = .3 * Math.PI * (1 - (isFixed ? 1 : .5) * state.pullProgress);
-          const dx = r * Math.cos(slideAngle);
-          const dy = -r * Math.sin(slideAngle);
-          btnPullLinePath += "a" + r + ', ' + r + " 0 0 1 " + (r + dx) + " " + dy;
-          btnPullLinePath += " L" + btnEnd[0] + "," + btnEnd[1];
-
-          gsap.set(btnPullLine, { attr: { d: btnPullLinePath }, strokeWidth: 3 });
-        }
-
-        return tl;
-      }
+        document.addEventListener('DOMContentLoaded', () => new SimpleLoginForm());
     </script>
-  </body>
+</body>
 </html>

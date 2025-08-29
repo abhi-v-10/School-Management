@@ -1,9 +1,11 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from studentsApp.models import Student
 from accountsApp.models import Notice
 from django.contrib.auth.decorators import login_required
 from attendanceApp.models import Attendance
 from django.utils.timezone import now
+from django.contrib import messages
+from .forms import LinkChildForm
 
 @login_required
 def dashboard_parent(request):
@@ -37,3 +39,34 @@ def dashboard_parent(request):
         "stats": stats,
     }
     return render(request, "parentsApp/dashboard.html", context)
+
+# New view to link a child (student) to the logged-in parent using student email
+@login_required
+def link_child(request):
+    parent = request.user.parent
+    if request.method == 'POST':
+        form = LinkChildForm(request.POST)
+        if form.is_valid():
+            email = form.cleaned_data['email'].strip().lower()
+            try:
+                student = Student.objects.get(user__email__iexact=email)
+            except Student.DoesNotExist:
+                form.add_error('email', 'This email is not registered as a student.')
+            else:
+                # ensure target user has student role
+                if getattr(student.user, 'role', '') != 'student':
+                    form.add_error('email', 'This account is not registered with a student role.')
+                elif student.parent and student.parent != parent:
+                    form.add_error('email', 'This student is already linked to another parent.')
+                elif student.parent == parent:
+                    messages.info(request, 'This student is already linked to your account.')
+                    return redirect('dashboard_parent')
+                else:
+                    # attach student to this parent
+                    student.parent = parent
+                    student.save()
+                    messages.success(request, f"Successfully linked {student.user.get_full_name() or student.user.username}.")
+                    return redirect('dashboard_parent')
+    else:
+        form = LinkChildForm()
+    return render(request, 'parentsApp/link_child.html', {'form': form})

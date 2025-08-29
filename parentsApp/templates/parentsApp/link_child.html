@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}Link Child{% endblock %}
+
+{% block extra_css %}
+<style>
+  .auth-card {
+    max-width: 520px;
+    margin: 40px auto;
+  }
+  .auth-card .card { padding:20px; border-radius:10px; }
+  .form-field + .form-field { margin-top:12px; }
+  .form-field label { display:block; font-size:.95rem; margin-bottom:6px; color:#333; }
+  .form-field input, .form-field select, .form-field textarea { width:100%; padding:10px 12px; border:1px solid #dee2e6; border-radius:8px; background:#fff; }
+  .form-field small { color:#6c757d; display:none; }
+  .form-field.has-error small { display:block; color:#dc3545; }
+  .errorlist { margin:6px 0 0; padding-left:18px; color:#dc3545; font-size:0.9rem; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="auth-card">
+  <div class="card shadow-sm border-0">
+    <h4 class="auth-title text-center mb-3">Link your child</h4>
+
+    {% if messages %}
+      {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+      {% endfor %}
+    {% endif %}
+
+    <form method="post" novalidate>
+      {% csrf_token %}
+
+      {% for field in form %}
+        <div class="form-field {% if field.errors %}has-error{% endif %}">
+          <label for="{{ field.id_for_label }}">{{ field.label }}{% if field.field.required %} *{% endif %}</label>
+          {{ field }}
+          {% if field.errors %}
+            <small>{{ field.errors.as_text|striptags }}</small>
+          {% endif %}
+        </div>
+      {% endfor %}
+
+      <div class="d-flex justify-content-between align-items-center mt-3">
+        <a href="{% url 'dashboard_parent' %}" class="btn btn-light">Cancel</a>
+          <button type="submit" class="role-btn"><span>Link Child</span></button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+

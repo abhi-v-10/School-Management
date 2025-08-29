@@ -1,5 +1,6 @@
 from django.urls import path, include
 from . import views
+from .views import change_password
 
 
 urlpatterns = [
@@ -14,4 +15,5 @@ urlpatterns = [
     path('dashboard/admin/', views.dashboard_admin, name='dashboard_admin'),
     path("notices/", views.notice_list, name="notice_list"),
     path("notices/create/", views.notice_create, name="notice_create"),
+    path('change-password/', change_password, name='change_password'),
 ]

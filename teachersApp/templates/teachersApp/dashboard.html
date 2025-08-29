@@ -34,10 +34,10 @@
       <div class="px-3 pt-2 pb-1 text-uppercase small text-muted">Menu</div>
       <a class="nav-link active" href="{% url 'dashboard_teacher' %}"><i class="bi bi-speedometer2"></i> Dashboard</a>
       <a class="nav-link" href="{% url 'inbox' %}"><i class="bi bi-chat-dots"></i> Inbox</a>
-      <a class="nav-link" href="#classes"><i class="bi bi-people"></i> Classes</a>
-      <a class="nav-link" href="#subjects"><i class="bi bi-journal"></i> Subjects</a>
+      <a class="nav-link" href=""><i class="bi bi-people"></i> Classes</a>
+      <a class="nav-link" href=""><i class="bi bi-journal"></i> Subjects</a>
       <a class="nav-link" href="{% url 'teacher_exams_list' %}"><i class="bi bi-journal-check"></i> Exams</a>
-      <a class="nav-link" href="#notices"><i class="bi bi-bell"></i> Notices</a>
+      <a class="nav-link" href="{% url 'notice_list' %}"><i class="bi bi-bell"></i> Notices</a>
     </div>
   </nav>
   <div id="teacherMain" class="flex-grow-1" style="margin-left:0; transition:margin-left .3s ease;">

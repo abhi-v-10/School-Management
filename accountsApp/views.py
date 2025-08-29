@@ -4,7 +4,7 @@ from django.contrib.auth import get_user_model
 from .forms import *
 from django.contrib import messages
 
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.contrib.auth import authenticate, login, logout
 from studentsApp.models import Student
 from teachersApp.models import Teacher
@@ -14,6 +14,7 @@ from examsApp.models import Exam  # removed ExamResult
 from messagingApp.models import Message
 from parentsApp.models import Parent  # added for parent count
 from accountsApp.models import Notice  # added for notifications
+from django.urls import reverse
 
 def home(request):
     return render(request, 'home.html')
@@ -23,7 +24,7 @@ def register_admin(request):
         form = AdminRegistrationForm(request.POST)
         if form.is_valid():
             user = form.save()
-            login(request, user)
+            login(request, user, backend='django.contrib.auth.backends.ModelBackend')
             return redirect('home')
     else:
         form = AdminRegistrationForm()
@@ -34,7 +35,7 @@ def register_teacher(request):
         form = TeacherRegistrationForm(request.POST)
         if form.is_valid():
             user = form.save()
-            login(request, user)
+            login(request, user, backend='django.contrib.auth.backends.ModelBackend')
             return redirect('home')
     else:
         form = TeacherRegistrationForm()
@@ -45,7 +46,7 @@ def register_student(request):
         form = StudentRegistrationForm(request.POST)
         if form.is_valid():
             user = form.save()
-            login(request, user)
+            login(request, user, backend='django.contrib.auth.backends.ModelBackend')
             return redirect('home')
     else:
         form = StudentRegistrationForm()
@@ -56,29 +57,30 @@ def register_parent(request):
         form = ParentRegistrationForm(request.POST)
         if form.is_valid():
             user = form.save()
-            login(request, user)
+            login(request, user, backend='django.contrib.auth.backends.ModelBackend')
             return redirect('home')
     else:
         form = ParentRegistrationForm()
     return render(request, 'accountsApp/register.html', {'form': form})
 
 def login_user(request):
+    # Handle normal and AJAX login requests. For AJAX we return JSON so the client
+    # can show the success animation and delay before performing the redirect.
     if request.method == 'POST':
-        username = request.POST['username']
-        password = request.POST['password']
+        username = request.POST.get('username', '').strip()
+        password = request.POST.get('password', '')
+
         user = authenticate(request, username=username, password=password)
         if user is not None:
             login(request, user)
-            # if user.role == 'admin':
-            #     return redirect('dashboard_admin')
-            # elif user.role == 'teacher':
-            #     return redirect('dashboard_teacher')
-            # elif user.role == 'student':
-            #     return redirect('dashboard_student')
-            # elif user.role == 'parent':
-            #     return redirect('dashboard_parent')
+            # on AJAX requests return JSON with redirect URL
+            if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+                return JsonResponse({'success': True, 'redirect_url': reverse('home')})
             return redirect('home')
         else:
+            # invalid credentials
+            if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+                return JsonResponse({'success': False, 'errors': ['Invalid credentials.']}, status=400)
             messages.error(request, "Invalid credentials. Please try again.")
     return render(request, 'accountsApp/login.html')
 
@@ -157,3 +159,22 @@ def notice_create(request):
         form = NoticeForm()
 
     return render(request, "accountsApp/notice_form.html", {"form": form})
+
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from .forms import ChangePasswordForm
+
+@login_required
+def change_password(request):
+    if request.method == 'POST':
+        form = ChangePasswordForm(request.user, request.POST)
+        if form.is_valid():
+            new_password = form.cleaned_data['new_password1']
+            request.user.set_password(new_password)
+            request.user.save()
+            messages.success(request, 'Your password has been changed successfully.')
+            return redirect('profile')
+    else:
+        form = ChangePasswordForm(request.user)
+    return render(request, 'accountsApp/change_password.html', {'form': form})

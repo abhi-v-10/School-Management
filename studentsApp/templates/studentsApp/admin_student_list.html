@@ -31,7 +31,9 @@
           <td class="text-end">
             <a class="role-btn" href="{% url 'admin_student_detail' s.pk %}"><span><i class="bi bi-eye"></i> View</span></a>
             <a class="role-btn" href="{% url 'admin_student_edit' s.pk %}"><span><i class="bi bi-pencil"></i> Edit</span></a>
-            <a class="role-btn" href="{% url 'conversation' s.parent.user.id %}"><span><i class="bi bi-chat-right-dots"></i> Message</span></a>
+            {% if s.parent and s.parent.user and s.parent.user.id %}
+              <a class="role-btn" href="{% url 'conversation' s.parent.user.id %}"><span><i class="bi bi-chat-right-dots"></i> Message</span></a>
+            {% endif %}
           </td>
         </tr>
         {% empty %}
