@@ -14,5 +14,7 @@ $PY manage.py collectstatic --noinput --clear
 
 echo "[build] Listing staticfiles root (first 20 entries)"
 ls -1 staticfiles | head -20 || true
+echo "[build] Listing css subdirectory (first 20 entries)"
+ls -1 staticfiles/css | head -20 || true
 
 echo "[build] Done"

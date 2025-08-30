@@ -29,9 +29,17 @@ env_path = os.path.join(BASE_DIR, '.env')
 SECRET_KEY = config("SECRET_KEY", default="insecure-development-key-change-me")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = config('DEBUG', default=False, cast=bool)
+
+# Build ALLOWED_HOSTS dynamically. Always include localhost/127.0.0.1.
+_env_hosts_raw = config('ALLOWED_HOSTS', default='')
+_env_hosts = [h.strip() for h in _env_hosts_raw.split(',') if h.strip()]
+# Allow any Vercel preview/prod subdomain.
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '.vercel.app'] + _env_hosts
+# De-duplicate while preserving order.
+_seen = set()
+ALLOWED_HOSTS = [h for h in ALLOWED_HOSTS if not (h in _seen or _seen.add(h))]
 AUTH_USER_MODEL = 'accountsApp.User'
-ALLOWED_HOSTS = ['127.0.0.1', 'school-management-ayag.vercel.app', 'scholaroid.vercel.app']
 
 
 # Application definition
