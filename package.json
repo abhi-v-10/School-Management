@@ -3,7 +3,6 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "build": "python3 manage.py collectstatic --noinput --clear || python manage.py collectstatic --noinput --clear"
+    "build": "cp -R static staticfiles || mkdir -p staticfiles && cp -R static/* staticfiles/"
   }
 }
-
