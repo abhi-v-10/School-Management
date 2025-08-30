@@ -91,16 +91,18 @@ WSGI_APPLICATION = 'managementProject.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-# Use DATABASE_URL if provided (e.g. production). In local/dev, fall back to sqlite.
+# Use DATABASE_URL if provided (e.g. production). In local/dev, fall back to local postgres.
 _db_url = config('DATABASE_URL', default='').strip()
-if _db_url:
-    # parse the URL into a Django DATABASES dict, then add conn_max_age and SSL options
+# Determine whether to use the remote DB. Vercel sets the VERCEL env var, and we also allow an explicit override.
+use_remote_db = os.environ.get('VERCEL') == '1' or config('USE_REMOTE_DB', default=False, cast=bool)
+
+if use_remote_db and _db_url:
+    # parse the URL into a Django DATABASES dict, then add connection age and SSL options
     _parsed = dj_database_url.parse(_db_url)
-    # Set reasonable persistent connection age
-    _parsed['CONN_MAX_AGE'] = 600
+    # Set reasonable persistent connection age (can be overridden via env)
+    _parsed['CONN_MAX_AGE'] = int(config('CONN_MAX_AGE', default=600))
     # Ensure SSL is required (useful for Supabase). If the URL already contains sslmode, this is harmless.
     opts = _parsed.get('OPTIONS', {})
-    # prefer existing sslmode if present, otherwise require it
     if 'sslmode' not in opts:
         opts['sslmode'] = 'require'
     _parsed['OPTIONS'] = opts
@@ -109,10 +111,15 @@ if _db_url:
         'default': _parsed
     }
 else:
+    # Local development: use a local Postgres server (configurable via LOCAL_* env vars)
     DATABASES = {
         'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': BASE_DIR / 'db.sqlite3',
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': config('LOCAL_DB_NAME', default='mydb'),
+            'USER': config('LOCAL_DB_USER', default='postgres'),
+            'PASSWORD': config('LOCAL_DB_PASSWORD', default='admin'),
+            'HOST': config('LOCAL_DB_HOST', default='localhost'),
+            'PORT': config('LOCAL_DB_PORT', default='5432'),
         }
     }
 
@@ -178,9 +185,11 @@ STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 
 # 👇 optional, only if you want extra static dirs in dev
-# STATICFILES_DIRS = [
-#     os.path.join(BASE_DIR, "static"),
-# ]
+# Serve the local 'static' directory during development so styles like role-btn are visible.
+if DEBUG:
+    STATICFILES_DIRS = [
+        os.path.join(BASE_DIR, 'static'),
+    ]
 
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
