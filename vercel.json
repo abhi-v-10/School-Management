@@ -1,6 +1,7 @@
 {
   "version": 2,
   "builds": [
+    { "src": "package.json", "use": "@vercel/static-build", "config": { "distDir": "staticfiles" } },
     { "src": "managementProject/wsgi.py", "use": "@vercel/python" }
   ],
   "routes": [
