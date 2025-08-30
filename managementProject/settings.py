@@ -31,7 +31,7 @@ SECRET_KEY = config("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 AUTH_USER_MODEL = 'accountsApp.User'
-ALLOWED_HOSTS = ['127.0.0.1', 'school-management-ayag.vercel.app']
+ALLOWED_HOSTS = ['127.0.0.1', 'school-management-ayag.vercel.app', 'scholaroid.vercel.app']
 
 
 # Application definition
