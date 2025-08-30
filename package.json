@@ -1,0 +1,9 @@
+{
+  "name": "school-management-static-build",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "python3 manage.py collectstatic --noinput --clear || python manage.py collectstatic --noinput --clear"
+  }
+}
+
