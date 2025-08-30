@@ -93,8 +93,8 @@ WSGI_APPLICATION = 'managementProject.wsgi.application'
 
 # Use DATABASE_URL if provided (e.g. production). In local/dev, fall back to local postgres.
 _db_url = config('DATABASE_URL', default='').strip()
-# Determine whether to use the remote DB. Vercel sets the VERCEL env var, and we also allow an explicit override.
-use_remote_db = os.environ.get('VERCEL') == '1' or config('USE_REMOTE_DB', default=False, cast=bool)
+ON_VERCEL = os.environ.get('VERCEL') == '1'
+use_remote_db = ON_VERCEL or config('USE_REMOTE_DB', default=False, cast=bool)
 
 if use_remote_db and _db_url:
     # parse the URL into a Django DATABASES dict, then add connection age and SSL options
@@ -109,6 +109,14 @@ if use_remote_db and _db_url:
 
     DATABASES = {
         'default': _parsed
+    }
+elif ON_VERCEL:
+    # Fallback to ephemeral SQLite on Vercel if no DATABASE_URL provided.
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        }
     }
 else:
     # Local development: use a local Postgres server (configurable via LOCAL_* env vars)

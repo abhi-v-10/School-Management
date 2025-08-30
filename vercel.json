@@ -1,7 +1,8 @@
 {
   "version": 2,
+  "buildCommand": "bash build_files.sh",
   "builds": [
-    { "src": "managementProject/wsgi.py", "use": "@vercel/python", "config": { "runtime": "python3.11", "maxLambdaSize": "50mb", "buildCommand": "bash build_files.sh" } }
+    { "src": "managementProject/wsgi.py", "use": "@vercel/python", "config": { "runtime": "python3.11", "maxLambdaSize": "50mb" } }
   ],
   "routes": [
     { "src": "/static/(.*)", "dest": "/staticfiles/$1" },
