@@ -102,32 +102,37 @@ WSGI_APPLICATION = 'managementProject.wsgi.application'
 # Use DATABASE_URL if provided (e.g. production). In local/dev, fall back to local postgres.
 _db_url = config('DATABASE_URL', default='').strip()
 ON_VERCEL = os.environ.get('VERCEL') == '1'
-use_remote_db = ON_VERCEL or config('USE_REMOTE_DB', default=False, cast=bool)
+ON_RENDER = os.environ.get('RENDER') == '1' or os.environ.get('RENDER_EXTERNAL_HOSTNAME') is not None
 
-if use_remote_db and _db_url:
-    # parse the URL into a Django DATABASES dict, then add connection age and SSL options
+if ON_RENDER:
+    # Use Render PostgreSQL database
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': os.environ.get('RENDER_DB_NAME', ''),
+            'USER': os.environ.get('RENDER_DB_USER', ''),
+            'PASSWORD': os.environ.get('RENDER_DB_PASSWORD', ''),
+            'HOST': os.environ.get('RENDER_DB_HOST', ''),
+            'PORT': os.environ.get('RENDER_DB_PORT', '5432'),
+            'CONN_MAX_AGE': int(os.environ.get('RENDER_DB_CONN_MAX_AGE', '600')),
+            'OPTIONS': {
+                'sslmode': 'require',
+            },
+        }
+    }
+elif ON_VERCEL and _db_url:
+    # Use Supabase/Postgres remote DB for Vercel
     _parsed = dj_database_url.parse(_db_url)
-    # Set reasonable persistent connection age (can be overridden via env)
     _parsed['CONN_MAX_AGE'] = int(config('CONN_MAX_AGE', default=600))
-    # Ensure SSL is required (useful for Supabase). If the URL already contains sslmode, this is harmless.
     opts = _parsed.get('OPTIONS', {})
     if 'sslmode' not in opts:
         opts['sslmode'] = 'require'
     _parsed['OPTIONS'] = opts
-
     DATABASES = {
         'default': _parsed
     }
-elif ON_VERCEL:
-    # Fallback to ephemeral SQLite on Vercel if no DATABASE_URL provided.
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-        }
-    }
 else:
-    # Local development: use a local Postgres server (configurable via LOCAL_* env vars)
+    # Local development: use local Postgres
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql',
