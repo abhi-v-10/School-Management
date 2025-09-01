@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Search Messages</h2>
+<form method="get">
+  <input type="text" name="q" value="{{ term }}" placeholder="Search...">
+  <button type="submit">Search</button>
+</form>
+{% if term %}
+  <h3>Direct Messages</h3>
+  <ul>
+    {% for m in results_direct %}
+      <li>{{ m.timestamp }} {{ m.sender.username }} → {{ m.receiver.username }}: {{ m.content|truncatechars:60 }}</li>
+    {% empty %}
+      <li>No direct matches.</li>
+    {% endfor %}
+  </ul>
+  <h3>Group Messages</h3>
+  <ul>
+    {% for gm in results_group %}
+      <li>{{ gm.timestamp }} [{{ gm.group.name }}] {{ gm.sender.username }}: {{ gm.content|truncatechars:60 }}</li>
+    {% empty %}
+      <li>No group matches.</li>
+    {% endfor %}
+  </ul>
+{% endif %}
+{% endblock %}

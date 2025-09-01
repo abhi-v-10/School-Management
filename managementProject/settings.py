@@ -53,6 +53,9 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
+    # Realtime
+    'channels',
+
     'accountsApp',
     'attendanceApp',
     'classesApp',
@@ -94,6 +97,14 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'managementProject.wsgi.application'
+ASGI_APPLICATION = 'managementProject.asgi.application'
+
+# Channels layer (in-memory default; for production use Redis)
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels.layers.InMemoryChannelLayer'
+    }
+}
 
 
 # Database

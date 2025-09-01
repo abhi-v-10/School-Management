@@ -9,8 +9,18 @@ https://docs.djangoproject.com/en/5.2/howto/deployment/asgi/
 
 import os
 
-from django.core.asgi import get_asgi_application
-
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'managementProject.settings')
 
-application = get_asgi_application()
+from django.core.asgi import get_asgi_application  # noqa: E402
+
+# Initialize Django (sets up apps) BEFORE importing routing/consumers
+django_app = get_asgi_application()
+
+from channels.routing import ProtocolTypeRouter, URLRouter  # noqa: E402,E401
+from channels.auth import AuthMiddlewareStack  # noqa: E402,E401
+from messagingApp import routing as messaging_routing  # noqa: E402,E401
+
+application = ProtocolTypeRouter({
+	'http': django_app,
+	'websocket': AuthMiddlewareStack(URLRouter(messaging_routing.websocket_urlpatterns)),
+})

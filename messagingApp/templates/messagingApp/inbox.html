@@ -29,6 +29,16 @@
   .role-student { background:#ffc107; }
   .role-parent { background:#17a2b8; }
   @media (max-width:600px){ .conv-item { padding:14px 16px; } .conv-avatar { width:46px; height:46px; font-size:16px; } }
+  .tab-bar { display:flex; background:#fff; border-bottom:1px solid #e5e7eb; }
+    .tab-btn { flex:1; padding:10px 0; background:transparent; border:none; font-weight:600; font-size:.8rem; letter-spacing:.5px; text-transform:uppercase; cursor:pointer; position:relative; }
+    .tab-btn.active { color:var(--accent); }
+    .tab-btn.active:after { content:""; position:absolute; left:20%; right:20%; bottom:0; height:3px; background:var(--accent); border-radius:3px 3px 0 0; }
+    .tab-panel { display:none; }
+    .tab-panel.active { display:block; }
+    .search-form { position:relative; }
+    .search-form i { position:absolute; left:10px; top:50%; transform:translateY(-50%); color:#64748b; font-size:14px; }
+    .search-input { padding:6px 12px 6px 32px; border-radius:999px; border:1px solid #d0d7e2; font-size:.8rem; width:210px; background:#ffffff; }
+    .search-input:focus { outline:none; border-color:var(--accent); box-shadow:0 0 0 3px rgba(24,117,255,.18); }
 </style>
 {% endblock %}
 
@@ -37,9 +47,23 @@
   <div class="inbox-card shadow-sm">
     <div class="inbox-header">
       <h1><i class="bi bi-chat-dots-fill me-2"></i>Inbox</h1>
-      <a href="{% url dashboard_url_name %}" class="role-btn"><span><i class="bi bi-arrow-left"></i> Back</span></a>
+      <div style="display:flex; gap:8px;">
+        <form method="get" action="" style="display:flex; gap:4px;">
+          <input type="text" name="q" value="{{ search_term }}" placeholder="Search messages" style="padding:4px 8px; border-radius:8px; border:1px solid #ddd;">
+          <button class="role-btn" type="submit" style="white-space:nowrap;"><span>Search</span></button>
+        </form>
+        {% if request.user.role == 'teacher' or request.user.role == 'admin' %}
+          <a href="{% url 'create_group' %}" class="role-btn"><span><i class="bi bi-people"></i> New Group</span></a>
+        {% endif %}
+        <a href="{% url dashboard_url_name %}" class="role-btn"><span><i class="bi bi-arrow-left"></i> Back</span></a>
+      </div>
     </div>
-    {% if conversations %}
+      <div class="tab-bar">
+        <button class="tab-btn active" data-tab="direct">Direct</button>
+        <button class="tab-btn" data-tab="groups">Groups</button>
+      </div>
+      <div id="tab-direct" class="tab-panel active">
+  {% if conversations %}
       <div class="conv-list">
         {% for u in conversations %}
           {# Determine unread: unread_count annotation #}
@@ -75,5 +99,72 @@
       </div>
     {% endif %}
   </div>
+      <div id="tab-groups" class="tab-panel">
+        {% if groups %}
+          <div class="conv-list">
+            {% for g in groups %}
+              <a href="{% url 'group_chat' g.id %}" class="conv-item">
+                <div class="conv-avatar" style="border-radius:14px;">👥</div>
+                <div class="conv-body">
+                  <div class="conv-top">
+                    <div class="conv-name">{{ g.name }}</div>
+                    <div class="role-chip">Group</div>
+                  </div>
+                  <div class="conv-preview">{{ g.messages.last.content|default:'No messages yet'|truncatechars:70 }}</div>
+                </div>
+                <div class="conv-meta">
+                  {% if g.messages.last %}
+                    <div class="conv-time">{{ g.messages.last.timestamp|date:"M d" }}<br>{{ g.messages.last.timestamp|date:"H:i" }}</div>
+                  {% endif %}
+                </div>
+              </a>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="inbox-empty">
+            <i class="bi bi-people"></i>
+            <p>No groups yet</p>
+          </div>
+        {% endif %}
+      </div>
+      {% if search_term %}
+        <div style="padding:0 24px 24px;">
+          <h2 style="font-size:1rem; font-weight:600;">Search Results ({{ search_results|length }})</h2>
+          {% if search_results %}
+            <ul style="list-style:none; padding:0; margin:8px 0; display:grid; gap:6px;">
+              {% for r in search_results %}
+                <li style="padding:10px 14px; border:1px solid #e2e8f0; border-radius:12px; background:#fff;">
+                  <a style="text-decoration:none; color:inherit;" href="{% if r.type == 'group' %}{% url 'group_chat' r.group.id %}#msg-{{ r.id }}{% else %}{% url 'conversation' r.other.id %}#msg-{{ r.id }}{% endif %}">
+                    <div style="font-size:.7rem; text-transform:uppercase; letter-spacing:.5px; color:#475569; margin-bottom:4px;">
+                      {% if r.type == 'group' %}Group: {{ r.group.name }}{% else %}Direct with {{ r.other.get_full_name|default:r.other.username }}{% endif %}
+                    </div>
+                    <div style="font-size:.8rem; color:#0f172a;">
+                      <strong>{{ r.sender.get_full_name|default:r.sender.username }}</strong> · {{ r.timestamp|date:"M d H:i" }}<br>
+                      {{ r.content|truncatechars:160 }}
+                      {% if r.file %}<br><span style="font-size:.65rem; color:#475569;">[Attachment]</span>{% endif %}
+                    </div>
+                  </a>
+                </li>
+              {% endfor %}
+            </ul>
+          {% else %}
+            <p style="color:#64748b; font-size:.85rem;">No matches for "{{ search_term }}".</p>
+          {% endif %}
+        </div>
+      {% endif %}
+    </div>
+  </div>
 </div>
 {% endblock %}
+  {% block extra_js %}
+  <script>
+    document.querySelectorAll('.tab-btn').forEach(btn=>{
+      btn.addEventListener('click',()=>{
+        document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+        document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById('tab-'+btn.dataset.tab).classList.add('active');
+      });
+    });
+  </script>
+  {% endblock %}

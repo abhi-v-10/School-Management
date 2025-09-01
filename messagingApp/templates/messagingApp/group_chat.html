@@ -1,0 +1,193 @@
+{% extends 'base.html' %}
+{% block title %}Group Chat{% endblock %}
+{% block extra_css %}
+<style>
+  .gchat-shell { max-width:950px; margin:0 auto; }
+  .gchat-card { border:1px solid #e5e7eb; border-radius:22px; overflow:hidden; display:flex; flex-direction:column; height:600px; background:#fff; }
+  .gchat-header { background:linear-gradient(45deg,var(--accent),#4facfe); color:#fff; padding:16px 24px; display:flex; align-items:center; justify-content:space-between; }
+  .gchat-header-left { display:flex; align-items:center; gap:14px; }
+  .gchat-icon { width:52px; height:52px; border-radius:18px; background:rgba(255,255,255,.15); display:flex; align-items:center; justify-content:center; font-size:24px; backdrop-filter:blur(4px); }
+  .gchat-title { font-weight:600; font-size:1rem; line-height:1.15; }
+  .gchat-sub { font-size:.6rem; letter-spacing:.5px; text-transform:uppercase; opacity:.85; }
+  .gchat-body { flex:1; padding:22px 26px 12px; overflow-y:auto; background:#fafbfc; }
+  .g-msg-row { margin-bottom:18px; display:flex; gap:10px; }
+  .g-msg-row.self { flex-direction:row-reverse; }
+  .g-avatar { width:42px; height:42px; border-radius:50%; background:#eef2ff; display:flex; align-items:center; justify-content:center; font-weight:600; font-size:15px; border:2px solid #e5e9f2; object-fit:cover; }
+  .g-bubble { max-width:60%; padding:11px 15px 20px; border-radius:18px; position:relative; font-size:.8rem; line-height:1.35; box-shadow:0 4px 10px rgba(0,0,0,.05); background:#ffffff; color:#222; }
+  .g-bubble:hover .g-msg-actions { opacity:1; transform:translateY(0); }
+  .g-msg-actions { position:absolute; top:-12px; right:6px; background:#1e293b; color:#fff; border-radius:18px; padding:4px 6px; font-size:0; display:flex; gap:4px; align-items:center; opacity:0; transform:translateY(-6px); transition:.18s; }
+  .g-msg-actions button { background:transparent; border:none; color:#fff; font-size:14px; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; width:22px; height:22px; border-radius:50%; }
+  .g-msg-actions button:hover { background:rgba(255,255,255,.15); }
+  .g-reaction-picker { position:absolute; z-index:40; background:#fff; border:1px solid #e2e8f0; padding:6px 8px; border-radius:14px; display:flex; gap:6px; top:100%; right:0; box-shadow:0 6px 20px rgba(0,0,0,.12); }
+  .g-reaction-picker button { background:#f1f5f9; border:none; padding:4px 6px; border-radius:10px; font-size:18px; cursor:pointer; }
+  .g-reaction-picker button:hover { background:var(--accent); color:#fff; }
+  .g-react-pills { position:absolute; left:16px; bottom:4px; display:flex; gap:4px; flex-wrap:wrap; }
+  .g-msg-row.self .g-bubble { background:var(--accent); color:#fff; border-bottom-right-radius:4px; }
+  .g-msg-row:not(.self) .g-bubble { border-bottom-left-radius:4px; }
+  .g-bubble .g-meta { display:block; margin-top:6px; font-size:.55rem; opacity:.7; font-weight:500; }
+  .g-attach { display:inline-flex; align-items:center; gap:6px; font-size:.65rem; margin-top:6px; padding:4px 8px; background:#f1f5f9; border-radius:8px; text-decoration:none; }
+  .g-react-bar { display:flex; gap:6px; margin-top:4px; }
+  .g-react-btn { background:rgba(0,0,0,.06); border:none; padding:3px 8px; border-radius:14px; font-size:.75rem; cursor:pointer; }
+  .g-react-btn:hover { background:rgba(0,0,0,.12); }
+  .g-reactions { display:inline-flex; gap:4px; flex-wrap:wrap; margin-top:4px; font-size:.9rem; }
+  .g-react-pills { display:flex; gap:4px; flex-wrap:wrap; margin-top:6px; }
+  .g-react-pill { background:#e2e8f0; padding:2px 6px; font-size:.55rem; border-radius:12px; display:inline-flex; align-items:center; gap:4px; }
+  .g-msg-row.self .g-react-pill { background:rgba(255,255,255,.25); color:#fff; }
+  .g-add-btn { background:#334155; }
+  .g-add-btn:hover { background:#1e293b; }
+  .g-attach-preview { display:flex; gap:8px; flex-wrap:wrap; margin:6px 4px 0; }
+  .g-attach-chip { background:#e2e8f0; border-radius:12px; padding:4px 10px; font-size:.6rem; display:flex; align-items:center; gap:6px; }
+  .g-attach-chip img { max-height:40px; border-radius:8px; display:block; }
+  .gchat-footer { padding:10px 18px 12px; background:#fff; border-top:1px solid #e5e7eb; }
+  .g-input-wrap { display:flex; gap:8px; align-items:center; }
+  .g-text { flex:1; resize:none; border:1px solid #d8dde3; border-radius:18px; padding:8px 14px; min-height:40px; max-height:130px; font-size:.8rem; line-height:1.2; }
+  .g-text:focus { outline:none; border-color:var(--accent); box-shadow:0 0 0 3px rgba(24,117,255,.15); }
+  .g-send-btn { border:none; background:var(--accent); color:#fff; padding:10px 14px; border-radius:16px; display:flex; align-items:center; gap:6px; font-weight:600; font-size:.75rem; }
+  .g-send-btn:hover { background:color-mix(in srgb,var(--accent) 85%, #000); }
+  .g-schedule { font-size:.65rem; color:#64748b; margin-top:6px; }
+  .empty-group { text-align:center; margin-top:140px; color:#97a0b3; }
+  .empty-group i { font-size:58px; display:block; margin-bottom:14px; }
+  @media (max-width:780px){ .gchat-card { height:calc(100vh - 150px); } .g-bubble { max-width:74%; } }
+</style>
+{% endblock %}
+{% block content %}
+<div class="gchat-shell mt-3">
+  <div class="gchat-card shadow-sm">
+    <div class="gchat-header">
+      <div class="gchat-header-left">
+        <div class="gchat-icon"><i class="bi bi-people"></i></div>
+        <div>
+          <div class="gchat-title">{{ group.name }}</div>
+          <div class="gchat-sub">{{ group.memberships.count }} members · {{ group.messages.count }} messages</div>
+        </div>
+      </div>
+      <div style="display:flex; gap:8px;">
+        <a href="{% url 'groups' %}" class="role-btn"><span><i class="bi bi-people"></i> Groups</span></a>
+        <a href="{% url 'inbox' %}" class="role-btn"><span><i class="bi bi-chat-dots"></i> Inbox</span></a>
+      </div>
+    </div>
+    <div class="gchat-body" id="gChatBody">
+      {% if chat_messages %}
+        {% for m in chat_messages %}
+          {% if m.sender == user %}
+            <div class="g-msg-row self" id="msg-{{ m.id }}" data-id="{{ m.id }}">
+              {% if user.profile_photo %}
+                <img src="{{ user.profile_photo.url }}" class="g-avatar" alt="me">
+              {% else %}
+                <div class="g-avatar">{{ user.get_full_name|default:user.username|slice:':1'|upper }}</div>
+              {% endif %}
+              <div class="g-bubble" data-id="{{ m.id }}">
+                <div class="g-msg-actions"><button class="g-more-btn" data-mid="{{ m.id }}">⋯</button></div>
+                {{ m.content|linebreaksbr }}
+                {% if m.file %}<br><a class="g-attach" href="{{ m.file.url }}" download><i class="bi bi-download"></i> Download</a>{% endif %}
+                {% if m.reactions.all %}
+                  <div class="g-react-pills">
+                    {% regroup m.reactions.all by emoji as g_reacts %}
+                    {% for grp in g_reacts %}
+                      <span class="g-react-pill">{{ grp.grouper }} {{ grp.list|length }}</span>
+                    {% endfor %}
+                  </div>
+                {% endif %}
+                <span class="g-meta">{{ m.timestamp|date:"M d, H:i" }}</span>
+              </div>
+            </div>
+          {% else %}
+            <div class="g-msg-row" id="msg-{{ m.id }}" data-id="{{ m.id }}">
+              {% if m.sender.profile_photo %}
+                <img src="{{ m.sender.profile_photo.url }}" class="g-avatar" alt="avatar">
+              {% else %}
+                <div class="g-avatar">{{ m.sender.get_full_name|default:m.sender.username|slice:':1'|upper }}</div>
+              {% endif %}
+              <div class="g-bubble" data-id="{{ m.id }}">
+                <div class="g-msg-actions"><button class="g-more-btn" data-mid="{{ m.id }}">⋯</button></div>
+                <strong style="font-size:.65rem; display:block; margin-bottom:4px; letter-spacing:.5px; text-transform:uppercase; color:#475569;">{{ m.sender.get_full_name|default:m.sender.username }}</strong>
+                {{ m.content|linebreaksbr }}
+                {% if m.file %}<br><a class="g-attach" href="{{ m.file.url }}" download><i class="bi bi-download"></i> Download</a>{% endif %}
+                {% if m.reactions.all %}
+                  <div class="g-react-pills">
+                    {% regroup m.reactions.all by emoji as g_reacts_other %}
+                    {% for grp in g_reacts_other %}
+                      <span class="g-react-pill">{{ grp.grouper }} {{ grp.list|length }}</span>
+                    {% endfor %}
+                  </div>
+                {% endif %}
+                <span class="g-meta">{{ m.timestamp|date:"M d, H:i" }}</span>
+              </div>
+            </div>
+          {% endif %}
+        {% endfor %}
+  {% else %}
+        <div class="empty-group"><i class="bi bi-chat-square-dots"></i>No messages yet</div>
+      {% endif %}
+    </div>
+    <div class="gchat-footer">
+      <form method="post" enctype="multipart/form-data" id="gChatForm" autocomplete="off">
+        {% csrf_token %}
+        <div class="g-input-wrap">
+          <textarea name="content" class="g-text" id="gText" placeholder="Type a message..." required></textarea>
+          <label for="gFileInput" class="g-send-btn g-add-btn" title="Add attachment" style="padding:8px 12px; height:40px;">
+            <i class="bi bi-plus-lg"></i>
+            <input type="file" id="gFileInput" name="file" accept="image/*,.pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.zip" style="display:none;">
+          </label>
+          <button type="submit" class="g-send-btn" style="height:40px;"><i class="bi bi-send-fill"></i><span>Send</span></button>
+        </div>
+        <div class="g-attach-preview" id="gAttachPreview" style="display:none;"></div>
+        <div class="g-schedule">Press Enter to send • Shift+Enter for newline • Double-tap/Double-click a bubble to 👍</div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script>
+  const gChatBody = document.getElementById('gChatBody');
+  function scrollBottom(){ gChatBody.scrollTop = gChatBody.scrollHeight; }
+  scrollBottom();
+  const gText = document.getElementById('gText');
+  const gForm = document.getElementById('gChatForm');
+  gText.addEventListener('keydown', e => { if(e.key==='Enter' && !e.shiftKey){ e.preventDefault(); const txt=gText.value.trim(); if(!txt) return; if(gWs && gWs.readyState===1){ gWs.send(JSON.stringify({action:'send', content:txt})); gText.value=''; } else { gForm.submit(); } } });
+  // Reactions picker & polling
+  function sendReaction(id, emoji){ const fd=new FormData(); fd.append('emoji',emoji); fd.append('type','group'); fd.append('id',id); fetch('{% url 'react_message' %}', {method:'POST', headers:{'X-CSRFToken':'{{ csrf_token }}'}, body:fd}).then(r=>r.json()).then(data=>{ if(data.reactions){ updateReactionStrip(id,data.reactions); } }); }
+  function updateReactionStrip(id, reactions){ const bubble=document.querySelector('.g-bubble[data-id="'+id+'"]'); if(!bubble) return; let strip=bubble.querySelector('.g-react-pills'); if(!strip){ strip=document.createElement('div'); strip.className='g-react-pills'; bubble.appendChild(strip); } strip.innerHTML=''; reactions.forEach(r=>{ const pill=document.createElement('span'); pill.className='g-react-pill'; pill.textContent=r.emoji+' '+r.count; strip.appendChild(pill); }); }
+  const G_EMOJIS=['👍','❤️','😂','😮','😢']; let gPicker=null;
+  function openGPicker(container, mid){ closeGPicker(); const picker=document.createElement('div'); picker.className='g-reaction-picker'; G_EMOJIS.forEach(e=>{ const b=document.createElement('button'); b.textContent=e; b.onclick=()=>{ sendReaction(mid,e); closeGPicker(); }; picker.appendChild(b); }); container.appendChild(picker); gPicker=picker; document.addEventListener('mousedown', gOutside); }
+  function closeGPicker(){ if(gPicker){ gPicker.remove(); gPicker=null; document.removeEventListener('mousedown', gOutside);} }
+  function gOutside(ev){ if(gPicker && !gPicker.contains(ev.target)) closeGPicker(); }
+  document.querySelectorAll('.g-more-btn').forEach(btn=> btn.addEventListener('click', e=>{ e.stopPropagation(); openGPicker(btn.parentElement, btn.dataset.mid); }));
+  document.addEventListener('dblclick', e=>{ const b=e.target.closest('.g-bubble'); if(!b) return; sendReaction(b.dataset.id,'👍'); });
+  // WebSocket realtime group
+  const gScheme = location.protocol==='https:'?'wss':'ws';
+  const gWs = new WebSocket(`${gScheme}://${location.host}/ws/group/{{ group.id }}/`);
+  const gTyping = document.createElement('div'); gTyping.className='small text-muted'; gTyping.style.margin='3px 12px'; gTyping.style.display='none'; gTyping.textContent='Someone typing...'; gChatBody.after(gTyping);
+  let gOldestId = Array.from(document.querySelectorAll('.g-bubble')).map(b=>parseInt(b.dataset.id)).sort((a,b)=>a-b)[0] || null;
+  gWs.onmessage = e => { const data=JSON.parse(e.data); if(data.type==='new'){ gAppend(data.message,true); } else if(data.type==='older'){ gPrepend(data.messages); } else if(data.type==='typing'){ gTyping.style.display='block'; clearTimeout(window._gT); window._gT=setTimeout(()=> gTyping.style.display='none',1400);} else if(data.type==='reaction'){ updateReactionStrip(data.message_id, data.reactions); } };
+  gWs.onerror = ()=> { console.warn('WS error group fallback'); if(!window._gFallback){ window._gFallback=true; startGroupFallback(); } };
+  gWs.onclose = ()=> { if(!window._gFallback){ startGroupFallback(); } };
+  function startGroupFallback(){ let lastId=gOldestId; const loop=()=>{ fetch('{% url 'group_poll' group.id %}?after='+(lastId||0)).then(r=>r.json()).then(d=>{ (d.messages||[]).forEach(m=>{ gAppend(m,true); lastId=Math.max(lastId||0,m.id); }); setTimeout(loop,3000); }).catch(()=> setTimeout(loop,5000)); }; loop(); }
+  function gAppend(m, scroll){ if(document.getElementById('msg-'+m.id)) return; const row=document.createElement('div'); row.className='g-msg-row '+(m.sender_id==={{ user.id }}?'self':''); row.id='msg-'+m.id; row.dataset.id=m.id; row.innerHTML=`<div class=\"g-avatar\">${m.sender_name.charAt(0).toUpperCase()}</div><div class=\"g-bubble\" data-id=\"${m.id}\"><div class=\"g-msg-actions\"><button class=\"g-more-btn\" data-mid=\"${m.id}\">⋯</button></div>${m.sender_id==={{ user.id }}?'':`<strong style=\"font-size:.65rem; display:block; margin-bottom:4px; letter-spacing:.5px; text-transform:uppercase; color:#475569;\">${m.sender_name}</strong>`}${m.content.replace(/\n/g,'<br>')}<span class=\"g-meta\">${new Date(m.timestamp).toLocaleString()}</span></div>`; gChatBody.appendChild(row); if(scroll) scrollBottom(); gOldestId = Math.min(gOldestId||m.id, m.id); bindGroupMore(row); }
+  function gPrepend(list){ if(!list.length) return; const prevH=gChatBody.scrollHeight; list.forEach(m=>{ if(document.getElementById('msg-'+m.id)) return; const row=document.createElement('div'); row.className='g-msg-row '+(m.sender_id==={{ user.id }}?'self':''); row.id='msg-'+m.id; row.dataset.id=m.id; row.innerHTML=`<div class=\"g-avatar\">${m.sender_name.charAt(0).toUpperCase()}</div><div class=\"g-bubble\" data-id=\"${m.id}\"><div class=\"g-msg-actions\"><button class=\"g-more-btn\" data-mid=\"${m.id}\">⋯</button></div>${m.sender_id==={{ user.id }}?'':`<strong style=\"font-size:.65rem; display:block; margin-bottom:4px; letter-spacing:.5px; text-transform:uppercase; color:#475569;\">${m.sender_name}</strong>`}${m.content.replace(/\n/g,'<br>')}<span class=\"g-meta\">${new Date(m.timestamp).toLocaleString()}</span></div>`; gChatBody.insertBefore(row, gChatBody.firstChild); gOldestId = Math.min(gOldestId||m.id, m.id); bindGroupMore(row); }); gChatBody.scrollTop = gChatBody.scrollHeight - prevH; }
+  function bindGroupMore(ctx){ ctx.querySelectorAll('.g-more-btn').forEach(btn=>{ if(!btn.dataset.bound){ btn.dataset.bound='1'; btn.addEventListener('click', e=>{ e.stopPropagation(); openGPicker(btn.parentElement, btn.dataset.mid); }); }}); }
+  // Infinite older for group
+  let gLoading=false; gChatBody.addEventListener('scroll', ()=>{ if(gChatBody.scrollTop<15 && !gLoading && gOldestId){ gLoading=true; gWs.send(JSON.stringify({action:'load_older', before:gOldestId})); setTimeout(()=> gLoading=false,700); }});
+  // Typing announce
+  let gTypingCooldown=false; gText.addEventListener('input', ()=>{ if(!gTypingCooldown){ gWs.send(JSON.stringify({action:'typing'})); gTypingCooldown=true; setTimeout(()=> gTypingCooldown=false,1000); }});
+  // Submit: if file present or WS not ready, AJAX upload, else pure WS
+  gForm.addEventListener('submit', e=>{ e.preventDefault(); const t=gText.value.trim(); const hasFile=gFileInput.files.length>0; if(!t && !hasFile) return; if(!hasFile && gWs && gWs.readyState===1){ gWs.send(JSON.stringify({action:'send', content:t})); gText.value=''; return; } const fd=new FormData(); fd.append('content', t); if(gFileInput.files[0]) fd.append('file', gFileInput.files[0]); fetch('{% url 'upload_group' group.id %}', {method:'POST', headers:{'X-CSRFToken':'{{ csrf_token }}'}, body:fd}).then(r=>r.json()).then(resp=>{ if(resp.error){ console.warn(resp.error); return; } gText.value=''; gFileInput.value=''; gPreview.innerHTML=''; gPreview.style.display='none'; }).catch(err=>console.error(err)); });
+  // attachment preview
+  const gFileInput = document.getElementById('gFileInput');
+  const gPreview = document.getElementById('gAttachPreview');
+  gFileInput.addEventListener('change',()=>{
+    gPreview.innerHTML='';
+    if(!gFileInput.files.length){ gPreview.style.display='none'; return; }
+    [...gFileInput.files].forEach(f=>{
+      const ext = f.name.split('.').pop().toLowerCase();
+      const chip = document.createElement('div'); chip.className='g-attach-chip';
+      if(['png','jpg','jpeg','gif','webp','bmp'].includes(ext)){
+        const img = document.createElement('img'); img.src = URL.createObjectURL(f); chip.appendChild(img);
+      } else { chip.innerHTML = `<i class="bi bi-paperclip"></i> ${f.name.substring(0,18)}`; }
+      gPreview.appendChild(chip);
+    });
+    gPreview.style.display='flex';
+  });
+</script>
+{% endblock %}

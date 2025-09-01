@@ -1,9 +1,10 @@
 {
   "version": 2,
   "builds": [
-    { "src": "managementProject/wsgi.py", "use": "@vercel/python", "config": { "runtime": "python3.11", "maxLambdaSize": "50mb", "buildCommand": "bash build_files.sh" } }
+    { "src": "managementProject/asgi.py", "use": "@vercel/python", "config": { "runtime": "python3.11", "maxLambdaSize": "80mb", "buildCommand": "bash build_files.sh" } }
   ],
   "routes": [
-    { "src": "/(.*)", "dest": "/managementProject/wsgi.py" }
+    { "src": "/ws/(.*)", "dest": "/managementProject/asgi.py" },
+    { "src": "/(.*)", "dest": "/managementProject/asgi.py" }
   ]
 }
