@@ -24,3 +24,8 @@ application = ProtocolTypeRouter({
 	'http': django_app,
 	'websocket': AuthMiddlewareStack(URLRouter(messaging_routing.websocket_urlpatterns)),
 })
+
+# Vercel's Python serverless expects a top-level variable named `app` or `handler`.
+# Alias for compatibility (will still be a Channels ASGI application).
+app = application
+handler = application
