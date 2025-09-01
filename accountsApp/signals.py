@@ -1,6 +1,7 @@
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from accountsApp.models import User
+from django.core.mail import get_connection, EmailMessage
+from accountsApp.models import User, Notice
 from teachersApp.models import Teacher
 from studentsApp.models import Student
 from parentsApp.models import Parent
@@ -14,3 +15,19 @@ def create_role_profile(sender, instance, created, **kwargs):
             Student.objects.create(user=instance)
         elif instance.role == 'parent':
             Parent.objects.create(user=instance, phone_number='')
+
+@receiver(post_save, sender=Notice)
+def send_notice_email(sender, instance, created, **kwargs):
+    if not created:
+        return
+    users = User.objects.exclude(email__isnull=True).exclude(email__exact='')
+    if not users:
+        return
+    subject = f"Notice: {instance.title}".strip()
+    body_template = f"A new notice has been posted.\n\nTitle: {instance.title}\nMessage:\n{instance.message}\n\nPosted on: {instance.created_at.strftime('%Y-%m-%d %H:%M')}"
+    connection = get_connection(fail_silently=True)
+    emails = []
+    for user in users:
+        personalized = f"Hello {user.first_name or user.username},\n\n{body_template}\n\nRegards,\nAdministration"
+        emails.append(EmailMessage(subject=subject, body=personalized, to=[user.email]))
+    connection.send_messages(emails)
