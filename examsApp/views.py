@@ -1,4 +1,4 @@
-from django.views.generic import ListView, CreateView, UpdateView
+from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -33,6 +33,15 @@ class AdminExamUpdate(AdminRequiredMixin, UpdateView):
     def form_valid(self, form):
         messages.success(self.request, "Exam updated.")
         return super().form_valid(form)
+
+class AdminExamDelete(AdminRequiredMixin, DeleteView):
+    model = Exam
+    template_name = 'examsApp/admin_exam_confirm_delete.html'
+    success_url = reverse_lazy('admin_exams_list')
+
+    def delete(self, request, *args, **kwargs):
+        messages.success(self.request, "Exam deleted.")
+        return super().delete(request, *args, **kwargs)
 
 class TeacherExamList(ListView):
     model = Exam

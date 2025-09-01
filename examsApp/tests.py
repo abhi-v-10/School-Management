@@ -1,5 +1,6 @@
 from django.test import TestCase
 from django.core import mail
+from django.urls import reverse
 from datetime import date
 from accountsApp.models import User
 from classesApp.models import ClassRoom, Subjects
@@ -37,3 +38,28 @@ class TestExamEmailSignal(TestCase):
         exam.max_marks = 120
         exam.save()
         self.assertEqual(len(mail.outbox), 0)
+
+class TestExamDeletion(TestCase):
+    def setUp(self):
+        self.admin = User.objects.create_user(username='admin', password='pass', role='admin', email='admin@example.com')
+        self.teacher = User.objects.create_user(username='teacher', password='pass', role='teacher', email='teacher@example.com')
+        self.class_room = ClassRoom.objects.create(name='Grade 6', section='B', capacity=35)
+        self.subject = Subjects.objects.create(subject='Science')
+        self.exam = Exam.objects.create(class_room=self.class_room, subject=self.subject, exam_date=date(2025, 10, 1), max_marks=80)
+
+    def test_admin_can_delete_exam(self):
+        self.client.login(username='admin', password='pass')
+        url = reverse('admin_exam_delete', args=[self.exam.pk])
+        resp_get = self.client.get(url)
+        self.assertEqual(resp_get.status_code, 200)
+        resp_post = self.client.post(url)
+        self.assertRedirects(resp_post, reverse('admin_exams_list'))
+        self.assertFalse(Exam.objects.filter(pk=self.exam.pk).exists())
+
+    def test_non_admin_cannot_delete_exam(self):
+        self.client.login(username='teacher', password='pass')
+        url = reverse('admin_exam_delete', args=[self.exam.pk])
+        resp = self.client.get(url)
+        # Should redirect due to permission denial
+        self.assertNotEqual(resp.status_code, 200)
+        self.assertTrue(Exam.objects.filter(pk=self.exam.pk).exists())
