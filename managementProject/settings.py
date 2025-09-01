@@ -29,7 +29,7 @@ env_path = os.path.join(BASE_DIR, '.env')
 SECRET_KEY = config("SECRET_KEY", default="insecure-development-key-change-me")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = config('DEBUG', default=False, cast=bool)
+DEBUG = config('DEBUG', default=True, cast=bool)
 
 # Build ALLOWED_HOSTS dynamically. Always include localhost/127.0.0.1.
 _env_hosts_raw = config('ALLOWED_HOSTS', default='')

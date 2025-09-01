@@ -1,11 +1,11 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth import get_user_model
 from .forms import *
 from django.contrib import messages
-
+from .forms import ChangePasswordForm
 from django.http import HttpResponse, JsonResponse
-from django.contrib.auth import authenticate, login, logout
 from studentsApp.models import Student
 from teachersApp.models import Teacher
 from classesApp.models import ClassRoom
@@ -58,6 +58,18 @@ def register_parent(request):
         if form.is_valid():
             user = form.save()
             login(request, user, backend='django.contrib.auth.backends.ModelBackend')
+            # auto-link any students that pre-specified this parent's email
+            try:
+                parent_profile = Parent.objects.get(user=user)
+                from studentsApp.models import Student
+                matches = Student.objects.filter(parent__isnull=True, parent_email__iexact=user.email)
+                for stu in matches:
+                    stu.parent = parent_profile
+                    stu.save(update_fields=['parent'])
+                if matches.exists():
+                    messages.success(request, f"Linked {matches.count()} student(s) to your parent account.")
+            except Parent.DoesNotExist:
+                pass
             return redirect('home')
     else:
         form = ParentRegistrationForm()
@@ -160,10 +172,6 @@ def notice_create(request):
 
     return render(request, "accountsApp/notice_form.html", {"form": form})
 
-from django.contrib.auth.decorators import login_required
-from django.shortcuts import render, redirect
-from django.contrib import messages
-from .forms import ChangePasswordForm
 
 @login_required
 def change_password(request):

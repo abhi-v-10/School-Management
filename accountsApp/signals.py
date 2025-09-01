@@ -3,8 +3,8 @@ from django.dispatch import receiver
 from django.core.mail import get_connection, EmailMessage
 from accountsApp.models import User, Notice
 from teachersApp.models import Teacher
-from studentsApp.models import Student
 from parentsApp.models import Parent
+from studentsApp.models import Student
 
 @receiver(post_save, sender=User)
 def create_role_profile(sender, instance, created, **kwargs):
@@ -12,9 +12,16 @@ def create_role_profile(sender, instance, created, **kwargs):
         if instance.role == 'teacher':
             Teacher.objects.create(user=instance)
         elif instance.role == 'student':
-            Student.objects.create(user=instance)
+            Student.objects.create(user=instance, parent_email='')
         elif instance.role == 'parent':
-            Parent.objects.create(user=instance, phone_number='')
+            parent_obj = Parent.objects.create(user=instance, phone_number='')
+            # auto-link any existing students that specified this email
+            # (removed inner import to avoid UnboundLocalError)
+            if instance.email:
+                matches = Student.objects.filter(parent__isnull=True, parent_email__iexact=instance.email)
+                for stu in matches:
+                    stu.parent = parent_obj
+                    stu.save(update_fields=['parent'])
 
 @receiver(post_save, sender=Notice)
 def send_notice_email(sender, instance, created, **kwargs):

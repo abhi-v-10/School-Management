@@ -10,7 +10,8 @@
         <h3 class="mt-2">Access Forbidden</h3>
         <p class="text-muted mb-4">You don’t have permission to view this resource.</p>
         <div class="d-flex gap-2 justify-content-center">
-          <a href="javascript:history.back()" class="btn btn-primary">Go Back</a>
+          {% load dashboard_tags %}
+          <a href="{% dashboard_url %}" class="btn btn-primary">Go to Dashboard</a>
           <a href="{% url 'home' %}" class="btn btn-outline-secondary">Home</a>
         </div>
       </div>

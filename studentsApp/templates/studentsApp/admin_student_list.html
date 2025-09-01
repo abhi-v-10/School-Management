@@ -44,7 +44,8 @@
   </div>
 </div>
     <div class="d-flex gap-2 mt-4">
-  <button class="role-btn" onclick="window.history.back();"><span>← Back</span></button>
+  {% load dashboard_tags %}
+  <a class="role-btn" href="{% dashboard_url %}"><span>← Back</span></a>
     </div>
 
 <nav class="mt-3">

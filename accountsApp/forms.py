@@ -28,14 +28,26 @@ class TeacherRegistrationForm(UserCreationForm):
         return user
     
 class StudentRegistrationForm(UserCreationForm):
+    parent_email = forms.EmailField(required=False, label="Parent Email",
+                                    widget=forms.EmailInput(attrs={'class': 'form-control', 'placeholder': "Parent's email (optional)"}))
     class Meta:
         model = User
-        fields = ['username', 'email', 'password1', 'password2']
+        fields = ['username', 'email', 'parent_email', 'password1', 'password2']
     def save(self, commit=True):
         user = super().save(commit=False)
         user.role = 'student'
         if commit:
             user.save()
+            # attach parent_email to auto-created Student profile if provided
+            from studentsApp.models import Student  # local import to avoid circular
+            try:
+                student = Student.objects.get(user=user)
+                pe = self.cleaned_data.get('parent_email')
+                if pe:
+                    student.parent_email = pe.lower()
+                    student.save()
+            except Exception:
+                pass
         return user
 
 class NoticeForm(forms.ModelForm):

@@ -26,7 +26,8 @@
   </div>
   <div class="d-flex gap-2 mt-4">
     <button class="role-btn" type="submit"><span><i class="bi bi-save"></i> Save</span></button>
-    <button class="role-btn" onclick="window.history.back();" type="button"><span>← Back</span></button>
+  {% load dashboard_tags %}
+  <a class="role-btn" href="{% dashboard_url %}" type="button"><span>← Back</span></a>
   </div>
 </form>
 {% endblock %}

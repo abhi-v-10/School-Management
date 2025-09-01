@@ -40,5 +40,6 @@
         </table>
     </div>
 </div>
-<button class="role-btn mt-4" onclick="window.history.back();"><span>← Back</span></button>
+{% load dashboard_tags %}
+<a class="role-btn mt-4" href="{% dashboard_url %}"><span>← Back</span></a>
 {% endblock %}
