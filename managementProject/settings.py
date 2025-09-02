@@ -31,14 +31,19 @@ SECRET_KEY = config("SECRET_KEY", default="insecure-development-key-change-me")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('DEBUG', default=True, cast=bool)
 
-# Build ALLOWED_HOSTS dynamically. Always include localhost/127.0.0.1.
+"""ALLOWED_HOSTS logic
+
+We keep it simple for Render:
+ - Always allow localhost / 127.0.0.1 for local dev.
+ - Add anything specified via ALLOWED_HOSTS env var (comma separated).
+ - If running on Render, append the platform-provided hostname (RENDER_EXTERNAL_HOSTNAME).
+"""
 _env_hosts_raw = config('ALLOWED_HOSTS', default='')
 _env_hosts = [h.strip() for h in _env_hosts_raw.split(',') if h.strip()]
-# Allow any Vercel preview/prod subdomain.
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '.vercel.app'] + _env_hosts
-# De-duplicate while preserving order.
+render_hostname = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost'] + _env_hosts + ([render_hostname] if render_hostname else [])
 _seen = set()
-ALLOWED_HOSTS = [h for h in ALLOWED_HOSTS if not (h in _seen or _seen.add(h))]
+ALLOWED_HOSTS = [h for h in ALLOWED_HOSTS if h and not (h in _seen or _seen.add(h))]
 AUTH_USER_MODEL = 'accountsApp.User'
 
 
@@ -64,6 +69,7 @@ INSTALLED_APPS = [
     'studentsApp',
     'teachersApp',
     'parentsApp',
+    'resourcesApp',
     'social_django',
 ]
 
@@ -100,50 +106,36 @@ WSGI_APPLICATION = 'managementProject.wsgi.application'
 ASGI_APPLICATION = 'managementProject.asgi.application'
 
 # Channels layer (in-memory default; for production use Redis)
-CHANNEL_LAYERS = {
-    'default': {
-        'BACKEND': 'channels.layers.InMemoryChannelLayer'
+REDIS_URL = os.environ.get('REDIS_URL') or config('REDIS_URL', default='')
+if REDIS_URL:
+    CHANNEL_LAYERS = {
+        'default': {
+            'BACKEND': 'channels_redis.core.RedisChannelLayer',
+            'CONFIG': { 'hosts': [REDIS_URL] }
+        }
     }
-}
+else:
+    # Fallback for local/dev without Redis
+    CHANNEL_LAYERS = {
+        'default': { 'BACKEND': 'channels.layers.InMemoryChannelLayer' }
+    }
 
 
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-# Use DATABASE_URL if provided (e.g. production). In local/dev, fall back to local postgres.
 _db_url = config('DATABASE_URL', default='').strip()
-ON_VERCEL = os.environ.get('VERCEL') == '1'
-ON_RENDER = os.environ.get('RENDER') == '1' or os.environ.get('RENDER_EXTERNAL_HOSTNAME') is not None
-
-if ON_RENDER:
-    # Use Render PostgreSQL database
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.postgresql',
-            'NAME': os.environ.get('RENDER_DB_NAME', ''),
-            'USER': os.environ.get('RENDER_DB_USER', ''),
-            'PASSWORD': os.environ.get('RENDER_DB_PASSWORD', ''),
-            'HOST': os.environ.get('RENDER_DB_HOST', ''),
-            'PORT': os.environ.get('RENDER_DB_PORT', '5432'),
-            'CONN_MAX_AGE': int(os.environ.get('RENDER_DB_CONN_MAX_AGE', '600')),
-            'OPTIONS': {
-                'sslmode': 'require',
-            },
-        }
-    }
-elif ON_VERCEL and _db_url:
-    # Use Supabase/Postgres remote DB for Vercel
-    _parsed = dj_database_url.parse(_db_url)
-    _parsed['CONN_MAX_AGE'] = int(config('CONN_MAX_AGE', default=600))
+if _db_url:
+    # Standard DATABASE_URL usage (Render supplies this for managed Postgres)
+    _parsed = dj_database_url.parse(_db_url, conn_max_age=int(config('CONN_MAX_AGE', default=600)))
+    # Enforce SSL if not explicitly disabled
     opts = _parsed.get('OPTIONS', {})
     if 'sslmode' not in opts:
         opts['sslmode'] = 'require'
     _parsed['OPTIONS'] = opts
-    DATABASES = {
-        'default': _parsed
-    }
+    DATABASES = { 'default': _parsed }
 else:
-    # Local development: use local Postgres
+    # Local fallback
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql',
@@ -216,12 +208,9 @@ STATIC_URL = '/static/'
 # 👇 for production (collectstatic output folder)
 STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 
-# Always include the top-level 'static' directory so collectstatic on Vercel
-# will gather your CSS/JS/images (including .role-btn styles) even when
-# DEBUG is False in production.
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'static'),
-]
+# Always include the top-level 'static' directory so collectstatic will
+# gather your CSS/JS/images even when DEBUG is False in production.
+STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 
 # 👇 optional, only if you want extra static dirs in dev
 # Serve the local 'static' directory during development so styles like role-btn are visible.
@@ -241,8 +230,9 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# --- Email configuration (for notification signals) ---
-# Allow overriding via environment; fall back to console backend for dev.
+WEBSOCKETS_ENABLED = config('WEBSOCKETS_ENABLED', default=True, cast=bool)
+
+# --- Email configuration ---
 EMAIL_BACKEND = config("EMAIL_BACKEND", default="django.core.mail.backends.console.EmailBackend")
 DEFAULT_FROM_EMAIL = config("DEFAULT_FROM_EMAIL", default="School Management <no-reply@example.com>")
 EMAIL_HOST = config("EMAIL_HOST", default="")
@@ -250,5 +240,13 @@ EMAIL_PORT = config("EMAIL_PORT", default=587, cast=int)
 EMAIL_HOST_USER = config("EMAIL_HOST_USER", default="")
 EMAIL_HOST_PASSWORD = config("EMAIL_HOST_PASSWORD", default="")
 EMAIL_USE_TLS = config("EMAIL_USE_TLS", default=True, cast=bool)
-# If both TLS and SSL are set, prefer TLS (common case). Django will handle mutually exclusive usage at runtime.
+
+# --- Security / Proxy headers (Render runs behind a proxy) ---
+if not DEBUG:
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    # Build CSRF trusted origins dynamically for Render
+    if render_hostname:
+        CSRF_TRUSTED_ORIGINS = [f"https://{render_hostname}"]
 

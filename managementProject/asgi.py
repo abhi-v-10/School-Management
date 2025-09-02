@@ -18,14 +18,25 @@ django_app = get_asgi_application()
 
 from channels.routing import ProtocolTypeRouter, URLRouter  # noqa: E402,E401
 from channels.auth import AuthMiddlewareStack  # noqa: E402,E401
+from channels.security.websocket import AllowedHostsOriginValidator  # noqa: E402,E401
+from django.conf import settings  # noqa: E402,E401
 from messagingApp import routing as messaging_routing  # noqa: E402,E401
 
-application = ProtocolTypeRouter({
-	'http': django_app,
-	'websocket': AuthMiddlewareStack(URLRouter(messaging_routing.websocket_urlpatterns)),
-})
+# Build websocket application only if enabled
+if getattr(settings, 'WEBSOCKETS_ENABLED', True):
+	websocket_application = AllowedHostsOriginValidator(
+		AuthMiddlewareStack(
+			URLRouter(messaging_routing.websocket_urlpatterns)
+		)
+	)
+	application = ProtocolTypeRouter({
+		'http': django_app,
+		'websocket': websocket_application,
+	})
+else:
+	# Fallback to pure HTTP (useful for quick disabling in constrained envs)
+	application = django_app
 
-# Vercel's Python serverless expects a top-level variable named `app` or `handler`.
-# Alias for compatibility (will still be a Channels ASGI application).
+# Compatibility aliases (some platforms look for `app` or `handler`).
 app = application
 handler = application

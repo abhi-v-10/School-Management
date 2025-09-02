@@ -1,0 +1,104 @@
+{% extends 'base.html' %}
+{% block title %}Resources{% endblock %}
+{% block extra_css %}
+<style>
+.res-card{border-radius:16px;border:1px solid #e5e7eb;box-shadow:0 2px 4px rgba(0,0,0,.04);}
+.res-card .card-header{background:#fff;border-bottom:1px solid #eef0f2;font-weight:600;display:flex;justify-content:space-between;align-items:center;letter-spacing:.5px}
+.resource-item{border:1px solid #eef0f2;border-radius:14px;padding:16px 18px;transition:.25s;position:relative;background:linear-gradient(135deg,#ffffff,#f8fafc)}
+.resource-item:hover{box-shadow:0 10px 28px -4px rgba(0,0,0,.15);transform:translateY(-5px)}
+.resource-item h6{font-weight:600;letter-spacing:.3px}
+.badge-type{font-size:.6rem;letter-spacing:.5px;text-transform:uppercase;background:#f1f5f9;padding:4px 7px;border-radius:30px;border:1px solid #e2e8f0}
+.upload-wrapper{position:sticky;top:80px}
+.form-floating>.form-control, .form-floating>.form-select{height:calc(3.5rem + 2px);}
+.small-label{font-size:.7rem;text-transform:uppercase;font-weight:600;letter-spacing:.7px;color:#64748b;margin-bottom:4px}
+.divider-text{display:flex;align-items:center;text-transform:uppercase;font-size:.65rem;font-weight:600;letter-spacing:1px;color:#94a3b8;margin:14px 0}
+.divider-text:before,.divider-text:after{content:"";flex:1;height:1px;background:#e2e8f0;margin:0 8px}
+.empty-state{background:#f8fafc;border:1px dashed #cbd5e1;padding:30px;border-radius:14px;text-align:center}
+</style>
+{% endblock %}
+{% block content %}
+<div class="container py-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h3 class="mb-0">Your Resources</h3>
+    <a href="{% url 'dashboard_teacher' %}" class="btn btn-sm btn-outline-secondary">Back</a>
+  </div>
+  <div class="row g-4">
+    <div class="col-lg-5">
+      <div class="card res-card upload-wrapper">
+        <div class="card-header"><i class="bi bi-cloud-arrow-up me-1 text-primary"></i> Upload New Resource</div>
+        <div class="card-body">
+          <form method="post" enctype="multipart/form-data" class="vstack gap-3">
+            {% csrf_token %}
+            {{ form.non_field_errors }}
+            <div>
+              <label class="small-label">Title</label>
+              {{ form.title }}
+            </div>
+            <div>
+              <label class="small-label">Description</label>
+              {{ form.description }}
+            </div>
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="small-label">Class</label>
+                {{ form.class_room }}
+              </div>
+              <div class="col-md-6">
+                <label class="small-label">Subject</label>
+                {{ form.subject }}
+              </div>
+            </div>
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="small-label">Type</label>
+                {{ form.resource_type }}
+              </div>
+              <div class="col-md-6">
+                <label class="small-label">File</label>
+                {{ form.file }}
+              </div>
+            </div>
+            <button class="btn btn-primary w-100 mt-1"><i class="bi bi-upload me-1"></i>Upload Resource</button>
+          </form>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-7">
+      <div class="card res-card h-100">
+        <div class="card-header">Uploaded</div>
+        <div class="card-body">
+          {% if resources %}
+            <div class="vstack gap-3">
+              {% for r in resources %}
+                <div class="resource-item">
+                  <div class="d-flex justify-content-between align-items-start mb-1">
+                    <div>
+                      <h6 class="mb-1">{{ r.title }}</h6>
+                      <div class="text-muted small">{{ r.class_room }}{% if r.subject %} • {{ r.subject.subject }}{% endif %}</div>
+                    </div>
+                    <span class="badge badge-type">{{ r.get_resource_type_display }}</span>
+                  </div>
+                  <div class="d-flex justify-content-between align-items-center mb-2 small text-muted">
+                    <span>{{ r.created_at|date:'d M Y H:i' }}</span>
+                    <span class="d-inline-flex gap-1">
+                      <a href="{{ r.file.url }}" class="btn btn-light btn-sm border"><i class="bi bi-download"></i></a>
+                      <a href="{% url 'resource_detail' r.pk %}" class="btn btn-light btn-sm border"><i class="bi bi-eye"></i></a>
+                    </span>
+                  </div>
+                  {% if r.description %}<p class="small mb-0">{{ r.description|truncatechars:140 }}</p>{% endif %}
+                </div>
+              {% endfor %}
+            </div>
+          {% else %}
+            <div class="empty-state">
+              <i class="bi bi-folder2-open display-6 d-block mb-2 text-primary"></i>
+              <p class="mb-1 fw-semibold">No resources yet</p>
+              <p class="small text-muted mb-0">Upload your first file using the form on the left.</p>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

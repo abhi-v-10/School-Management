@@ -33,6 +33,7 @@ urlpatterns = [
     path('exams/', include('examsApp.urls')),
     path('messages/', include('messagingApp.urls')),
     path('attendance/', include('attendanceApp.urls')),
+    path('resources/', include('resourcesApp.urls')),
 ]
 
 if settings.DEBUG:

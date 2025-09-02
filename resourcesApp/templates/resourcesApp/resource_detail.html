@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% block title %}Resource Detail{% endblock %}
+{% block extra_css %}
+<style>
+.meta-line small{display:inline-block;margin-right:14px;color:#64748b;font-size:.75rem;letter-spacing:.5px;text-transform:uppercase;font-weight:600}
+.card.shadow-sm{border-radius:18px}
+</style>
+{% endblock %}
+{% block content %}
+<div class="container py-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h3 class="mb-0">{{ resource.title }}</h3>
+    <div>
+      {% if user.role == 'teacher' %}
+        <a href="{% url 'teacher_resources' %}" class="btn btn-sm btn-outline-secondary">Back</a>
+      {% elif user.role == 'student' %}
+        <a href="{% url 'student_resources' %}" class="btn btn-sm btn-outline-secondary">Back</a>
+      {% endif %}
+    </div>
+  </div>
+  <div class="row g-4">
+    <div class="col-lg-7">
+      <div class="card border-0 shadow-sm">
+        <div class="card-body">
+          <p class="text-muted mb-2">{{ resource.description }}</p>
+          <div class="meta-line mb-2">
+            <small><i class="bi bi-door-open"></i> {{ resource.class_room }}</small>
+            {% if resource.subject %}<small><i class="bi bi-journal"></i> {{ resource.subject.subject }}</small>{% endif %}
+            <small><i class="bi bi-person"></i> {{ resource.uploaded_by.get_full_name|default:resource.uploaded_by.username }}</small>
+            <small><i class="bi bi-calendar"></i> {{ resource.created_at|date:'d M Y H:i' }}</small>
+          </div>
+          <a href="{{ resource.file.url }}" class="btn btn-primary" download>Download File</a>
+        </div>
+      </div>
+    </div>
+    
+  </div>
+</div>
+{% endblock %}
