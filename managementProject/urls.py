@@ -18,7 +18,12 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
+from django.http import HttpResponse
 from accountsApp.views import home
+
+
+def health(request):  # Simple fast health check (HEAD/GET)
+    return HttpResponse("ok", content_type="text/plain")
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -34,6 +39,7 @@ urlpatterns = [
     path('messages/', include('messagingApp.urls')),
     path('attendance/', include('attendanceApp.urls')),
     path('resources/', include('resourcesApp.urls')),
+    path('healthz/', health),  # Render / uptime probes
 ]
 
 if settings.DEBUG:
