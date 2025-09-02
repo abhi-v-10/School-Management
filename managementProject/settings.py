@@ -125,27 +125,33 @@ else:
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
 _db_url = config('DATABASE_URL', default='').strip()
-if _db_url:
-    # Standard DATABASE_URL usage (Render supplies this for managed Postgres)
+if os.environ.get('RENDER'):
+    # Running on Render: REQUIRE DATABASE_URL (managed Postgres). Fail fast if missing.
+    if not _db_url:
+        raise RuntimeError("DATABASE_URL not set on Render. Attach a Render PostgreSQL instance or set the variable manually.")
     _parsed = dj_database_url.parse(_db_url, conn_max_age=int(config('CONN_MAX_AGE', default=600)))
-    # Enforce SSL if not explicitly disabled
     opts = _parsed.get('OPTIONS', {})
     if 'sslmode' not in opts:
         opts['sslmode'] = 'require'
     _parsed['OPTIONS'] = opts
     DATABASES = { 'default': _parsed }
 else:
-    # Local fallback
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.postgresql',
-            'NAME': config('LOCAL_DB_NAME', default='mydb'),
-            'USER': config('LOCAL_DB_USER', default='postgres'),
-            'PASSWORD': config('LOCAL_DB_PASSWORD', default='admin'),
-            'HOST': config('LOCAL_DB_HOST', default='localhost'),
-            'PORT': config('LOCAL_DB_PORT', default='5432'),
+    # Local development: use local Postgres (configure via LOCAL_DB_* or default values)
+    if _db_url:
+        # Allow developer to optionally use a DATABASE_URL locally (e.g. for staging DB access)
+        _parsed = dj_database_url.parse(_db_url, conn_max_age=int(config('CONN_MAX_AGE', default=0)))
+        DATABASES = { 'default': _parsed }
+    else:
+        DATABASES = {
+            'default': {
+                'ENGINE': 'django.db.backends.postgresql',
+                'NAME': config('LOCAL_DB_NAME'),
+                'USER': config('LOCAL_DB_USER'),
+                'PASSWORD': config('LOCAL_DB_PASSWORD'),
+                'HOST': config('LOCAL_DB_HOST'),
+                'PORT': config('LOCAL_DB_PORT'),
+            }
         }
-    }
 
 
 # Password validation
