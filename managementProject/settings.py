@@ -252,7 +252,19 @@ if not DEBUG:
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
-    # Build CSRF trusted origins dynamically for Render
-    if render_hostname:
-        CSRF_TRUSTED_ORIGINS = [f"https://{render_hostname}"]
+
+# --- CSRF Trusted Origins ---
+# Always build this list (even in DEBUG) so misconfigured DEBUG on production doesn't break forms.
+_csrf_env = config('CSRF_TRUSTED_ORIGINS', default='')
+_csrf_list = [o.strip() for o in _csrf_env.split(',') if o.strip()]
+if render_hostname:
+    # Add the Render primary hostname automatically (https scheme)
+    _csrf_list.append(f"https://{render_hostname}")
+# De-duplicate while preserving order
+_seen_csrf = set()
+CSRF_TRUSTED_ORIGINS = [o for o in _csrf_list if not (o in _seen_csrf or _seen_csrf.add(o))]
+
+if DEBUG and not CSRF_TRUSTED_ORIGINS:
+    # Helpful hint in development logs (only emitted when someone inspects settings or prints it)
+    pass  # Intentionally no origins; local same-origin posts will still work.
 
