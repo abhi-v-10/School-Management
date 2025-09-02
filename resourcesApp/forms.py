@@ -1,5 +1,5 @@
 from django import forms
-from .models import Resource, ResourceRating
+from .models import Resource
 from classesApp.models import ClassRoom
 
 class ResourceForm(forms.ModelForm):
@@ -22,13 +22,3 @@ class ResourceForm(forms.ModelForm):
             # Limit class_room and subject choices to teacher's assignments
             self.fields['class_room'].queryset = teacher.assigned_class.all()
             self.fields['subject'].queryset = teacher.subject.all()
-
-class ResourceRatingForm(forms.ModelForm):
-    class Meta:
-        model = ResourceRating
-        fields = ['rating', 'comment']
-        widgets = {
-            'comment': forms.Textarea(attrs={'rows':2, 'placeholder':'Optional comment', 'class':'form-control'})
-        }
-    rating = forms.IntegerField(min_value=1, max_value=5, widget=forms.NumberInput(attrs={'class':'form-control', 'placeholder':'1-5'}))
-
