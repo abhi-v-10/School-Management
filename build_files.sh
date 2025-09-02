@@ -5,9 +5,6 @@ echo "[render-build] Running Django build steps"
 PY=${PYTHON:-python}
 echo "[render-build] Interpreter: $($PY --version 2>&1)"
 
-echo "[render-build] Applying migrations"
-$PY manage.py migrate --noinput
-
 echo "[render-build] Collecting static files"
 $PY manage.py collectstatic --noinput --clear
 
