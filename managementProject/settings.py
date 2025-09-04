@@ -128,6 +128,8 @@ _db_url = config('DATABASE_URL', default='').strip()
 _force_sqlite = config('USE_SQLITE_FOR_DEV', default=False, cast=bool)
 # Global override: force SQLite everywhere (including Render) when set.
 _force_all_sqlite = config('FORCE_SQLITE', default=False, cast=bool)
+# Explicit opt-in to use DATABASE_URL locally (kept off by default so local dev relies on SQLite).
+_local_use_postgres = config('LOCAL_USE_POSTGRES', default=False, cast=bool)
 
 def _with_pg_keepalives(parsed: dict) -> dict:
     """Inject sensible SSL + keepalive defaults for Render / remote Postgres.
@@ -143,31 +145,40 @@ def _with_pg_keepalives(parsed: dict) -> dict:
     parsed['OPTIONS'] = opts
     return parsed
 
+"""Database selection strategy
+
+Local (no RENDER env var):
+  - Default: SQLite (fast, zero-config) ignoring any accidental DATABASE_URL.
+  - Optional: set LOCAL_USE_POSTGRES=1 to allow using DATABASE_URL locally.
+Render (RENDER env var present):
+  - Use Postgres via DATABASE_URL (required) unless FORCE_SQLITE=1 (not recommended for prod).
+Force flags:
+  - FORCE_SQLITE / USE_SQLITE_FOR_DEV => always SQLite.
+"""
+
 if _force_all_sqlite or _force_sqlite:
-    # Uniform SQLite mode (NOT recommended for production with concurrency or scaling).
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
             'NAME': BASE_DIR / 'db.sqlite3',
         }
     }
+elif os.environ.get('RENDER'):
+    if not _db_url:
+        raise RuntimeError("DATABASE_URL not set on Render. Provide a Postgres URL or set FORCE_SQLITE=1 (NOT recommended).")
+    _parsed = dj_database_url.parse(_db_url, conn_max_age=int(config('CONN_MAX_AGE', default=600)))
+    DATABASES = { 'default': _with_pg_keepalives(_parsed) }
 else:
-    if os.environ.get('RENDER'):
-        if not _db_url:
-            raise RuntimeError("DATABASE_URL not set on Render. Set FORCE_SQLITE=1 to bypass (ephemeral data risk).")
-        _parsed = dj_database_url.parse(_db_url, conn_max_age=int(config('CONN_MAX_AGE', default=600)))
+    if _local_use_postgres and _db_url:
+        _parsed = dj_database_url.parse(_db_url, conn_max_age=int(config('CONN_MAX_AGE', default=0)))
         DATABASES = { 'default': _with_pg_keepalives(_parsed) }
     else:
-        if (_db_url):
-            _parsed = dj_database_url.parse(_db_url, conn_max_age=int(config('CONN_MAX_AGE', default=0)))
-            DATABASES = { 'default': _with_pg_keepalives(_parsed) }
-        else:
-            DATABASES = {
-                'default': {
-                    'ENGINE': 'django.db.backends.sqlite3',
-                    'NAME': BASE_DIR / 'db.sqlite3',
-                }
+        DATABASES = {
+            'default': {
+                'ENGINE': 'django.db.backends.sqlite3',
+                'NAME': BASE_DIR / 'db.sqlite3',
             }
+        }
 
 
 # Password validation
