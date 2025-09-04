@@ -132,16 +132,26 @@ _force_all_sqlite = config('FORCE_SQLITE', default=False, cast=bool)
 _local_use_postgres = config('LOCAL_USE_POSTGRES', default=False, cast=bool)
 
 def _with_pg_keepalives(parsed: dict) -> dict:
-    """Inject sensible SSL + keepalive defaults for Render / remote Postgres.
+    """Inject SSL + optional keepalive tuning for remote Postgres.
 
-    Helps avoid 'SSL connection has been closed unexpectedly' during idle periods.
+    Previous version used invalid GUC names (keepalives*) causing:
+      FATAL: unrecognized configuration parameter "keepalives"
+    Correct Postgres parameters are tcp_keepalives_*.
+    Controlled by env PG_KEEPALIVES (default: enabled on Render only).
+    Set PG_KEEPALIVES=0 to disable the tuning.
     """
     opts = parsed.get('OPTIONS', {})
     if 'sslmode' not in opts:
         opts['sslmode'] = 'require'
-    # Add keepalive tuning only if not already supplied by env
-    if 'options' not in opts:
-        opts['options'] = '-c keepalives=1 -c keepalives_idle=30 -c keepalives_interval=10 -c keepalives_count=5'
+    enable = True
+    try:
+        enable = config('PG_KEEPALIVES', default='1' if os.environ.get('RENDER') else '0', cast=bool)
+    except Exception:
+        enable = True
+    # Only add if caller didn't already provide custom options
+    if enable and 'options' not in opts:
+        # conservative values; avoid too aggressive pings
+        opts['options'] = '-c tcp_keepalives_idle=60 -c tcp_keepalives_interval=30 -c tcp_keepalives_count=5'
     parsed['OPTIONS'] = opts
     return parsed
 
