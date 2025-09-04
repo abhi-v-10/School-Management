@@ -125,33 +125,49 @@ else:
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
 _db_url = config('DATABASE_URL', default='').strip()
-if os.environ.get('RENDER'):
-    # Running on Render: REQUIRE DATABASE_URL (managed Postgres). Fail fast if missing.
-    if not _db_url:
-        raise RuntimeError("DATABASE_URL not set on Render. Attach a Render PostgreSQL instance or set the variable manually.")
-    _parsed = dj_database_url.parse(_db_url, conn_max_age=int(config('CONN_MAX_AGE', default=600)))
-    opts = _parsed.get('OPTIONS', {})
+_force_sqlite = config('USE_SQLITE_FOR_DEV', default=False, cast=bool)
+# Global override: force SQLite everywhere (including Render) when set.
+_force_all_sqlite = config('FORCE_SQLITE', default=False, cast=bool)
+
+def _with_pg_keepalives(parsed: dict) -> dict:
+    """Inject sensible SSL + keepalive defaults for Render / remote Postgres.
+
+    Helps avoid 'SSL connection has been closed unexpectedly' during idle periods.
+    """
+    opts = parsed.get('OPTIONS', {})
     if 'sslmode' not in opts:
         opts['sslmode'] = 'require'
-    _parsed['OPTIONS'] = opts
-    DATABASES = { 'default': _parsed }
-else:
-    # Local development: use local Postgres (configure via LOCAL_DB_* or default values)
-    if _db_url:
-        # Allow developer to optionally use a DATABASE_URL locally (e.g. for staging DB access)
-        _parsed = dj_database_url.parse(_db_url, conn_max_age=int(config('CONN_MAX_AGE', default=0)))
-        DATABASES = { 'default': _parsed }
-    else:
-        DATABASES = {
-            'default': {
-                'ENGINE': 'django.db.backends.postgresql',
-                'NAME': config('LOCAL_DB_NAME'),
-                'USER': config('LOCAL_DB_USER'),
-                'PASSWORD': config('LOCAL_DB_PASSWORD'),
-                'HOST': config('LOCAL_DB_HOST'),
-                'PORT': config('LOCAL_DB_PORT'),
-            }
+    # Add keepalive tuning only if not already supplied by env
+    if 'options' not in opts:
+        opts['options'] = '-c keepalives=1 -c keepalives_idle=30 -c keepalives_interval=10 -c keepalives_count=5'
+    parsed['OPTIONS'] = opts
+    return parsed
+
+if _force_all_sqlite or _force_sqlite:
+    # Uniform SQLite mode (NOT recommended for production with concurrency or scaling).
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
         }
+    }
+else:
+    if os.environ.get('RENDER'):
+        if not _db_url:
+            raise RuntimeError("DATABASE_URL not set on Render. Set FORCE_SQLITE=1 to bypass (ephemeral data risk).")
+        _parsed = dj_database_url.parse(_db_url, conn_max_age=int(config('CONN_MAX_AGE', default=600)))
+        DATABASES = { 'default': _with_pg_keepalives(_parsed) }
+    else:
+        if (_db_url):
+            _parsed = dj_database_url.parse(_db_url, conn_max_age=int(config('CONN_MAX_AGE', default=0)))
+            DATABASES = { 'default': _with_pg_keepalives(_parsed) }
+        else:
+            DATABASES = {
+                'default': {
+                    'ENGINE': 'django.db.backends.sqlite3',
+                    'NAME': BASE_DIR / 'db.sqlite3',
+                }
+            }
 
 
 # Password validation
@@ -237,6 +253,9 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 WEBSOCKETS_ENABLED = config('WEBSOCKETS_ENABLED', default=True, cast=bool)
+
+# Allow overriding session backend via env (e.g., signed cookies when DB unreachable)
+SESSION_ENGINE = config('SESSION_ENGINE', default='django.contrib.sessions.backends.db')
 
 # --- Email configuration ---
 EMAIL_BACKEND = config("EMAIL_BACKEND", default="django.core.mail.backends.console.EmailBackend")
