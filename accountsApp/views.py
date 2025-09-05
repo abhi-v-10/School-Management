@@ -25,7 +25,13 @@ def register_admin(request):
         if form.is_valid():
             user = form.save()
             login(request, user, backend='django.contrib.auth.backends.ModelBackend')
+            if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+                return JsonResponse({'success': True, 'redirect_url': reverse('home')})
             return redirect('home')
+        else:
+            if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+                errors = {f: list(v) for f, v in form.errors.items()}
+                return JsonResponse({'success': False, 'field_errors': errors}, status=400)
     else:
         form = AdminRegistrationForm()
     return render(request, 'accountsApp/register.html', {'form': form})
@@ -36,7 +42,13 @@ def register_teacher(request):
         if form.is_valid():
             user = form.save()
             login(request, user, backend='django.contrib.auth.backends.ModelBackend')
+            if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+                return JsonResponse({'success': True, 'redirect_url': reverse('home')})
             return redirect('home')
+        else:
+            if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+                errors = {f: list(v) for f, v in form.errors.items()}
+                return JsonResponse({'success': False, 'field_errors': errors}, status=400)
     else:
         form = TeacherRegistrationForm()
     return render(request, 'accountsApp/register.html', {'form': form})
@@ -47,7 +59,13 @@ def register_student(request):
         if form.is_valid():
             user = form.save()
             login(request, user, backend='django.contrib.auth.backends.ModelBackend')
+            if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+                return JsonResponse({'success': True, 'redirect_url': reverse('home')})
             return redirect('home')
+        else:
+            if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+                errors = {f: list(v) for f, v in form.errors.items()}
+                return JsonResponse({'success': False, 'field_errors': errors}, status=400)
     else:
         form = StudentRegistrationForm()
     return render(request, 'accountsApp/register.html', {'form': form})
@@ -70,7 +88,13 @@ def register_parent(request):
                     messages.success(request, f"Linked {matches.count()} student(s) to your parent account.")
             except Parent.DoesNotExist:
                 pass
+            if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+                return JsonResponse({'success': True, 'redirect_url': reverse('home')})
             return redirect('home')
+        else:
+            if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+                errors = {f: list(v) for f, v in form.errors.items()}
+                return JsonResponse({'success': False, 'field_errors': errors}, status=400)
     else:
         form = ParentRegistrationForm()
     return render(request, 'accountsApp/register.html', {'form': form})

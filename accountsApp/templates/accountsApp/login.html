@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Scholaroid - Login Page</title>
+    <!-- Bootstrap Icons for eye / eye-slash -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -46,11 +48,10 @@
             color: rgba(255, 255, 255, 0.7); font-size: 16px; transition: all 0.3s ease;
             pointer-events: none;
         }
-        .input-wrapper input:focus + label,
-        .input-wrapper input.has-value + label {
-            transform: translateY(-8px) scale(0.85);
-            color: #06b6d4; font-weight: 500;
-        }
+    /* Show label only when empty */
+    .input-wrapper label { opacity:1; transition:opacity .25s; }
+    .input-wrapper input.filled + label { opacity:0; visibility:hidden; }
+    .input-wrapper input:focus + label { color:#06b6d4; }
         .error-message {
             display: block; color: #ef4444; font-size: 12px; font-weight: 500;
             margin-top: 6px; opacity: 0; transition: all 0.3s ease;
@@ -127,8 +128,10 @@
                     <div class="input-wrapper password-wrapper" style="position:relative;">
                         <input type="password" id="password" name="password" required>
                         <label for="password">Password</label>
-                        <!-- toggle button added; minimal inline style so visual layout remains unchanged -->
-                        <button type="button" id="togglePassword" aria-label="Toggle password visibility" style="position:absolute; right:12px; top:50%; transform:translateY(-50%); background:transparent; border:none; color:white; cursor:pointer; font-size:18px;">&#128065;</button>
+                        <!-- toggle button with Bootstrap Icons -->
+                        <button type="button" id="togglePassword" aria-label="Show password" style="position:absolute; right:12px; top:50%; transform:translateY(-50%); background:transparent; border:none; color:white; cursor:pointer; display:flex; align-items:center; padding:4px; font-size:20px;">
+                            <i id="pwEyeIcon" class="bi bi-eye"></i>
+                        </button>
                     </div>
                     <span class="error-message" id="passwordError"></span>
                 </div>
@@ -175,22 +178,27 @@
                 this.form.addEventListener('submit', (e) => this.handleSubmit(e));
                 Object.keys(this.validators).forEach(name => {
                     const field = document.getElementById(name);
-                    field.addEventListener('input', () => this.clearError(name));
-                    // add has-value class to keep label floated when input has value
-                    field.addEventListener('blur', () => {
-                        if (field.value.trim()) field.classList.add('has-value'); else field.classList.remove('has-value');
-                    });
+                    const syncFilled = () => {
+                        if (field.value.trim()) field.classList.add('filled'); else field.classList.remove('filled');
+                    };
+                    syncFilled();
+                    field.addEventListener('input', () => { this.clearError(name); syncFilled(); });
+                    field.addEventListener('blur', syncFilled);
                 });
 
                 // password toggle
                 if (this.toggleBtn && this.passwordField) {
+                    const icon = document.getElementById('pwEyeIcon');
                     this.toggleBtn.addEventListener('click', () => {
-                        if (this.passwordField.type === 'password') {
-                            this.passwordField.type = 'text';
-                            this.toggleBtn.innerHTML = '&#128584;'; // change icon
-                        } else {
+                        const showing = this.passwordField.type === 'text';
+                        if (showing) {
                             this.passwordField.type = 'password';
-                            this.toggleBtn.innerHTML = '&#128065;';
+                            icon.className = 'bi bi-eye';
+                            this.toggleBtn.setAttribute('aria-label','Show password');
+                        } else {
+                            this.passwordField.type = 'text';
+                            icon.className = 'bi bi-eye-slash';
+                            this.toggleBtn.setAttribute('aria-label','Hide password');
                         }
                     });
                 }

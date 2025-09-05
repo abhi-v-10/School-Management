@@ -1,140 +1,214 @@
-{% extends 'base.html' %}
-{% block title %}Register{% endblock %}
-
-{% block extra_css %}
-<style>
-  .auth-card {
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
-    max-width: 520px;
-    margin: 40px auto;
-  }
-  .auth-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 16px rgba(0,0,0,0.1);
-  }
-  .auth-title {
-    font-weight: 600;
-    font-size: 1.25rem;
-  }
-  .form-field + .form-field {
-    margin-top: 12px;
-  }
-  .form-field label {
-    display: block;
-    font-size: 0.95rem;
-    margin-bottom: 6px;
-    color: #333;
-  }
-  .form-field input,
-  .form-field select,
-  .form-field textarea {
-    width: 100%;
-    padding: 10px 12px;
-    border: 1px solid #dee2e6;
-    border-radius: 8px;
-    background: #fff;
-  }
-  .form-field small {
-    color: #6c757d;
-    display: none; /* hidden by default */
-  }
-  .form-field.has-error small {
-    display: block; /* show only if field has error */
-    color: #dc3545;
-  }
-  .errorlist {
-    margin: 6px 0 0;
-    padding-left: 18px;
-    color: #dc3545;
-    font-size: 0.9rem;
-  }
-  .non-field-errors {
-    margin-bottom: 12px;
-    color: #dc3545;
-    font-size: 0.95rem;
-  }
-  .google-btn {
-      text-decoration: none;
-  max-width: 320px;
-  display: flex;
-  padding: 0.5rem 1.4rem;
-  font-size: 0.875rem;
-  line-height: 1.25rem;
-  font-weight: 700;
-  text-align: center;
-  text-transform: uppercase;
-  vertical-align: middle;
-  align-items: center;
-  border-radius: 0.5rem;
-  border: 1px solid rgba(0, 0, 0, 0.25);
-  gap: 0.75rem;
-  color: rgb(65, 63, 63);
-  background-color: #fff;
-  cursor: pointer;
-  transition: all .6s ease;
-}
-
-.google-btn svg {
-  height: 24px;
-}
-
-.google-btn:hover {
-  transform: scale(1.02);
-}
-</style>
-{% endblock %}
-
-{% block content %}
-<div class="auth-card">
-  <div class="card shadow-sm border-0 p-4">
-    <h4 class="auth-title text-center mb-3">Create an account</h4>
-
-    {% if form.non_field_errors %}
-      <div class="non-field-errors">
-        {{ form.non_field_errors }}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Scholaroid - Register</title>
+  <!-- Bootstrap Icons for password visibility toggles -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh; display: flex; align-items: center; justify-content: center;
+      padding: 20px; line-height: 1.6;
+    }
+    .register-container { width: 100%; max-width: 520px; }
+    .register-card {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 24px;
+      padding: 40px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+      transition: all 0.3s ease;
+      position: relative; overflow: hidden;
+    }
+    .register-header { text-align: center; margin-bottom: 32px; }
+    .register-header h2 {
+      color: white; font-size: 2rem; font-weight: 700; margin-bottom: 8px;
+      background: linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .register-header p { color: rgba(255, 255, 255, 0.8); font-size: 1rem; }
+    .form-group { margin-bottom: 22px; position: relative; }
+    .input-wrapper { position: relative; display: flex; flex-direction: column; }
+    .input-wrapper input {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 12px;
+      padding: 16px 16px 8px 16px;
+      color: white; font-size: 16px;
+      transition: all 0.3s ease; width: 100%; outline: none;
+      backdrop-filter: blur(10px);
+    }
+    .input-wrapper label {
+      position: absolute; left: 16px; top: 16px;
+      color: rgba(255, 255, 255, 0.7); font-size: 16px; transition: all 0.25s ease;
+      pointer-events: none; opacity:1;
+    }
+    .input-wrapper input.filled + label { opacity:0; visibility:hidden; }
+    .input-wrapper input:focus + label { color:#06b6d4; }
+    .error-message {
+      display: block; color: #ef4444; font-size: 12px; font-weight: 500;
+      margin-top: 6px; opacity: 0; transition: all 0.3s ease;
+    }
+    .error-message.show { opacity: 1; }
+    .btn {
+      background: linear-gradient(135deg, #6366f1 0%, #06b6d4 100%);
+      border: none; border-radius: 12px;
+      padding: 16px 24px; color: white;
+      font-size: 16px; font-weight: 600;
+      cursor: pointer; transition: all 0.3s ease;
+      position: relative; overflow: hidden; width: 100%;
+    }
+    .btn:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(99, 102, 241, 0.6); }
+    .btn:active { transform: translateY(0); }
+    .btn-loader { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 20px; height: 20px; border: 2px solid transparent; border-top: 2px solid white; border-radius: 50%; opacity: 0; animation: spin 1s linear infinite; }
+    .btn.loading .btn-text { opacity: 0; }
+    .btn.loading .btn-loader { opacity: 1; }
+    @keyframes spin { 0% { transform: translate(-50%, -50%) rotate(0deg);} 100% { transform: translate(-50%, -50%) rotate(360deg);} }
+    .login-link { text-align: center; margin-top: 20px; }
+    .login-link p { color: rgba(255, 255, 255, 0.8); font-size: 14px; }
+    .login-link a { color: #06b6d4; text-decoration: none; font-weight: 500; }
+    .login-link a:hover { color: white; }
+    .success-message { display: none; text-align: center; padding: 40px 20px; opacity: 0; transition: all 0.5s ease; }
+    .success-message.show { display: block; opacity: 1; }
+    .success-icon { width: 60px; height: 60px; background: #22c55e; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; color: white; margin: 0 auto 20px; }
+    .field-error-inline { color: #ef4444; font-size: 12px; margin-top: 4px; display:none; }
+    .field-error-inline.show { display:block; }
+    .google-btn { margin-top:12px; background:#fff; color:#374151; border-radius:12px; border:1px solid rgba(255,255,255,0.3); padding:12px 16px; display:flex; align-items:center; gap:10px; font-weight:600; text-decoration:none; justify-content:center; font-size:14px; }
+    .google-btn:hover { background:#f1f5f9; }
+    .divider { text-align:center; color:rgba(255,255,255,0.6); font-size:12px; margin:24px 0 8px; position:relative; }
+    .divider:before, .divider:after { content:""; position:absolute; top:50%; width:40%; height:1px; background:rgba(255,255,255,0.2); }
+    .divider:before { left:0; } .divider:after { right:0; }
+  </style>
+</head>
+<body>
+  <div class="register-container">
+    <div class="register-card">
+      <div class="register-header">
+        <h2>Create Account</h2>
+        <p>Join Scholaroid today</p>
       </div>
-    {% endif %}
-
-    <form method="POST" novalidate>
-      {% csrf_token %}
-
-      {% for field in form %}
-        <div class="form-field {% if field.errors %}has-error{% endif %}">
-          <label for="{{ field.id_for_label }}">
-            {{ field.label }}{% if field.field.required %} *{% endif %}
-          </label>
-          {{ field }}
-
-          {# show help text only if error or requirement not met #}
-          {% if field.errors %}
-            <small>{{ field.help_text }}</small>
-          {% endif %}
-
-          {{ field.errors }}
-        </div>
-      {% endfor %}
-
-      <button type="submit" class="btn btn-primary w-100 mt-3" style="background-color: #4285F4; border-color: #4285F4; color: #fff;">Register</button>
-    </form>
-
-    <div class="text-center my-3 text-muted">or</div>
-
-    <!-- Proper Google styled button -->
-    <div class="d-flex justify-content-center">
-      <a href="{% url 'social:begin' 'google-oauth2' %}" class="google-btn">
-        <svg xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid" viewBox="0 0 256 262">
-          <path fill="#4285F4" d="M255.878 133.451c0-10.734-.871-18.567-2.756-26.69H130.55v48.448h71.947c-1.45 12.04-9.283 30.172-26.69 42.356l-.244 1.622 38.755 30.023 2.685.268c24.659-22.774 38.875-56.282 38.875-96.027"></path>
-          <path fill="#34A853" d="M130.55 261.1c35.248 0 64.839-11.605 86.453-31.622l-41.196-31.913c-11.024 7.688-25.82 13.055-45.257 13.055-34.523 0-63.824-22.773-74.269-54.25l-1.531.13-40.298 31.187-.527 1.465C35.393 231.798 79.49 261.1 130.55 261.1"></path>
-          <path fill="#FBBC05" d="M56.281 156.37c-2.756-8.123-4.351-16.827-4.351-25.82 0-8.994 1.595-17.697 4.206-25.82l-.073-1.73L15.26 71.312l-1.335.635C5.077 89.644 0 109.517 0 130.55s5.077 40.905 13.925 58.602l42.356-32.782"></path>
-          <path fill="#EB4335" d="M130.55 50.479c24.514 0 41.05 10.589 50.479 19.438l36.844-35.974C195.245 12.91 165.798 0 130.55 0 79.49 0 35.393 29.301 13.925 71.947l42.211 32.783c10.59-31.477 39.891-54.251 74.414-54.251"></path>
+      <form id="registerForm" method="post" novalidate>
+        {% csrf_token %}
+        <div id="nonFieldErrors" class="error-message" style="margin-bottom:12px;"></div>
+        {% for field in form %}
+          <div class="form-group" data-field="{{ field.name }}">
+            <div class="input-wrapper">
+              {{ field.as_widget|safe }}
+              <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+              {% if field.field.widget.input_type == 'password' %}
+              <button type="button" class="pw-toggle" data-target="{{ field.id_for_label }}" aria-label="Show password" style="position:absolute; right:12px; top:50%; transform:translateY(-50%); background:transparent; border:none; color:white; cursor:pointer; display:flex; align-items:center; padding:4px; font-size:20px;">
+                <i class="bi bi-eye"></i>
+              </button>
+              {% endif %}
+            </div>
+            <span class="field-error-inline" id="err-{{ field.name }}"></span>
+          </div>
+        {% endfor %}
+        <button type="submit" class="btn" id="registerBtn">
+          <span class="btn-text">Register</span>
+          <span class="btn-loader"></span>
+        </button>
+      </form>
+            <div class="divider" id="socialDivider">OR</div>
+            <a class="google-btn" id="googleAuth" href="{% url 'social:begin' 'google-oauth2' %}">
+        <svg xmlns="http://www.w3.org/2000/svg" style="height:20px" viewBox="0 0 256 262" preserveAspectRatio="xMidYMid">
+          <path fill="#4285F4" d="M255.88 133.45c0-10.73-.87-18.57-2.76-26.69H130.55v48.45h71.95c-1.45 12.04-9.29 30.17-26.69 42.36l-.24 1.62 38.75 30.02 2.69.27c24.66-22.77 38.87-56.28 38.87-96.03"/>
+          <path fill="#34A853" d="M130.55 261.1c35.25 0 64.84-11.61 86.45-31.62l-41.2-31.92c-11.02 7.69-25.82 13.06-45.25 13.06-34.53 0-63.83-22.77-74.27-54.25l-1.53.13-40.3 31.19-.53 1.46C35.39 231.8 79.49 261.1 130.55 261.1"/>
+          <path fill="#FBBC05" d="M56.28 156.37c-2.76-8.12-4.35-16.83-4.35-25.82 0-8.99 1.6-17.7 4.21-25.82l-.07-1.73L15.26 71.31l-1.34.64C5.08 89.64 0 109.52 0 130.55s5.08 40.9 13.93 58.6l42.35-32.78"/>
+          <path fill="#EB4335" d="M130.55 50.48c24.51 0 41.05 10.59 50.48 19.44l36.84-35.97C195.25 12.91 165.8 0 130.55 0 79.49 0 35.39 29.3 13.93 71.95l42.21 32.78c10.59-31.48 39.89-54.25 74.41-54.25"/>
         </svg>
         <span>Continue with Google</span>
       </a>
+      <div class="login-link">
+        <p>Already have an account? <a href="{% url 'login' %}">Sign in</a></p>
+      </div>
+      <div class="success-message" id="successMessage">
+        <div class="success-icon">✓</div>
+        <h3 style="color:white; margin-bottom:8px;">Registration Successful!</h3>
+        <p style="color:rgba(255,255,255,0.8);">Redirecting to home...</p>
+      </div>
     </div>
-
-    <p class="text-center text-muted mt-3 mb-0" style="font-size: 0.95rem;">
-      Already have an account? <a href="{% url 'login' %}">Sign in</a>
-    </p>
   </div>
-</div>
-{% endblock %}
+  <script>
+    (function(){
+      const form = document.getElementById('registerForm');
+      const btn = document.getElementById('registerBtn');
+            const successMessage = document.getElementById('successMessage');
+            const googleBtn = document.getElementById('googleAuth');
+            const socialDivider = document.getElementById('socialDivider');
+      const nonField = document.getElementById('nonFieldErrors');
+      const inputs = form.querySelectorAll('input');
+      inputs.forEach(inp => {
+        // Remove any placeholder; rely solely on label
+        inp.removeAttribute('placeholder');
+        const sync = () => { if (inp.value.trim()) inp.classList.add('filled'); else inp.classList.remove('filled'); };
+        sync();
+        inp.addEventListener('input', sync);
+        inp.addEventListener('blur', sync);
+      });
+
+      // password visibility toggles
+      document.querySelectorAll('.pw-toggle').forEach(btn => {
+        const targetId = btn.getAttribute('data-target');
+        const input = document.getElementById(targetId);
+        if(!input) return;
+        btn.addEventListener('click', () => {
+          const show = input.type === 'password';
+          input.type = show ? 'text' : 'password';
+          const icon = btn.querySelector('i');
+          if(show){
+            icon.className = 'bi bi-eye-slash';
+            btn.setAttribute('aria-label','Hide password');
+          } else {
+            icon.className = 'bi bi-eye';
+            btn.setAttribute('aria-label','Show password');
+          }
+        });
+      });
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if(btn.classList.contains('loading')) return;
+        // clear previous errors
+        nonField.textContent=''; nonField.classList.remove('show');
+        form.querySelectorAll('.field-error-inline').forEach(el=>{ el.textContent=''; el.classList.remove('show'); });
+        btn.classList.add('loading');
+        const csrf = form.querySelector('input[name="csrfmiddlewaretoken"]').value;
+        const formData = new FormData(form);
+        try {
+          const resp = await fetch(window.location.href, { method:'POST', headers:{'X-Requested-With':'XMLHttpRequest','X-CSRFToken':csrf}, body: formData });
+          const data = await resp.json();
+          if(!resp.ok || !data.success){
+            if(data.field_errors){
+              Object.entries(data.field_errors).forEach(([field, errs])=>{
+                const span = document.getElementById('err-'+field);
+                if(span){ span.textContent = errs.join(' '); span.classList.add('show'); }
+              });
+            } else if(data.errors) {
+              nonField.textContent = (Array.isArray(data.errors) ? data.errors[0] : data.errors) || 'Registration failed.'; nonField.classList.add('show');
+            } else {
+              nonField.textContent = 'Registration failed.'; nonField.classList.add('show');
+            }
+            btn.classList.remove('loading');
+            return;
+          }
+          // success
+                    form.style.display='none';
+                    if (googleBtn) googleBtn.style.display='none';
+                    if (socialDivider) socialDivider.style.display='none';
+          successMessage.classList.add('show');
+          btn.classList.remove('loading');
+          setTimeout(()=>{ window.location.href = data.redirect_url || '/'; }, 2500);
+        } catch(err){
+          nonField.textContent = 'An unexpected error occurred.'; nonField.classList.add('show');
+          btn.classList.remove('loading');
+        }
+      });
+    })();
+  </script>
+</body>
+</html>
