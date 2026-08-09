@@ -11,13 +11,27 @@
         <tr><th>Subject</th><th>Class</th><th>Date</th><th>Max Marks</th></tr>
       </thead>
       <tbody>
+        {% now "Y-m-d" as today %}
         {% for e in object_list %}
+        {% with edate=e.exam_date|date:"Y-m-d" %}
         <tr>
           <td>{{ e.subject.subject }}</td>
           <td>{{ e.class_room.name }}-{{ e.class_room.section }}</td>
           <td>{{ e.exam_date }}</td>
-          <td>{{ e.max_marks }}</td>
+          <td>
+            <div class="d-flex align-items-center" style="max-width: 220px;">
+              <span>{{ e.max_marks }}</span>
+              {% if edate == today %}
+                <span class="text-warning fw-semibold ms-auto">Today</span>
+              {% elif edate < today %}
+                <span class="text-danger fw-semibold ms-auto">Finished</span>
+              {% else %}
+                <span class="text-success fw-semibold ms-auto">Upcoming</span>
+              {% endif %}
+            </div>
+          </td>
         </tr>
+        {% endwith %}
         {% empty %}
         <tr><td colspan="4" class="text-center">No exams scheduled.</td></tr>
         {% endfor %}

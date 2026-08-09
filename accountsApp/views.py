@@ -15,6 +15,7 @@ from messagingApp.models import Message
 from parentsApp.models import Parent  # added for parent count
 from accountsApp.models import Notice  # added for notifications
 from django.urls import reverse
+from django.utils import timezone
 
 def home(request):
     return render(request, 'home.html')
@@ -140,7 +141,7 @@ def dashboard_admin(request):
         "notification_count": Notice.objects.count(),
         "recent_attendance": Attendance.objects.order_by('-date')[:5],
         "recent_messages": Message.objects.order_by('-timestamp')[:5],
-        "recent_exams": Exam.objects.order_by('-exam_date')[:5],
+        "recent_exams": Exam.objects.filter(exam_date__gte=timezone.now().date()).order_by('exam_date')[:5],
         "recent_students": Student.objects.order_by('-admission_date')[:5],
         "recent_notifications": Notice.objects.order_by('-created_at')[:5],
         "active_users": get_user_model().objects.filter(is_active=True).count(),
